@@ -12,11 +12,11 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/trabalhos" element={<TrabalhosList />} />
-      <Route path="/trabalhos/:id" element={<TrabalhoDetail />} />
+      <Route path="/trabalhos/:slug" element={<TrabalhoDetail />} />
       <Route path="/portfolio" element={<PortfolioList />} />
-      <Route path="/portfolio/:id" element={<PortfolioDetail />} />
+      <Route path="/portfolio/:slug" element={<PortfolioDetail />} />
       <Route path="/noticias" element={<NoticiasList />} />
-      <Route path="/noticias/:id" element={<NoticiaDetail />} />
+      <Route path="/noticias/:slug" element={<NoticiaDetail />} />
     </Routes>
   );
 }

@@ -1,36 +1,57 @@
 /**
- * Unit tests for the Argumento Produções HomePage.
+ * Testes unitários da HomePage.
  *
- * Strategy: render the full page and assert that all critical sections,
- * navigation anchors, ARIA landmarks, and key brand copy are present in
- * the DOM. Motion animations are mocked so tests run synchronously.
+ * Estratégia: mockar a store Zustand e o roteador para isolar o componente.
+ * Dados da API são simulados via mock da store — sem chamadas reais de rede.
  */
 
 import { render, screen, within } from "@testing-library/react";
-import { describe, it, expect, vi, beforeAll } from "vitest";
-import HomePage, { NAV_ITEMS, SectionLabel, SectionTitle } from "../pages/Home";
+import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
+import { MemoryRouter } from "react-router-dom";
+import HomePage, { SectionLabel, SectionTitle } from "../pages/Home";
 
-// ─── Mocks ───────────────────────────────────────────────────────────────────
+// ─── Mock da store Zustand ────────────────────────────────────────────────────
 
-// Mock framer-motion / motion so animations don't error in jsdom
+const mockFetchTrabalhos = vi.fn();
+const mockFetchNoticias = vi.fn();
+const mockFetchPortfolio = vi.fn();
+
+const storeDefaults = {
+  trabalhos: { items: [], loading: false, error: null, currentPage: 1, lastPage: 1 },
+  portfolio:  { items: [], loading: false, error: null, currentPage: 1, lastPage: 1 },
+  noticias:   { items: [], loading: false, error: null, currentPage: 1, lastPage: 1 },
+  fetchTrabalhos: mockFetchTrabalhos,
+  fetchNoticias:  mockFetchNoticias,
+  fetchPortfolio: mockFetchPortfolio,
+};
+
+// Permite sobrescrever partes do estado por teste
+let storeOverride: Record<string, unknown> = {};
+
+vi.mock("../store/useAppStore", () => ({
+  useAppStore: (selector?: (s: typeof storeDefaults) => unknown) => {
+    const state = { ...storeDefaults, ...storeOverride };
+    return selector ? selector(state as typeof storeDefaults) : state;
+  },
+}));
+
+// ─── Mock motion/react ────────────────────────────────────────────────────────
+
 vi.mock("motion/react", () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require("react");
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const passthrough = (tag: string) => ({ children, ...rest }: any) => {
-    // Strip all motion-specific props before passing to DOM element
-    /* eslint-disable @typescript-eslint/no-unused-vars */
+  const passthrough = (tag: string) => ({ children, style, ...rest }: any) => {
     const {
-      initial, animate, exit, transition, variants,
-      whileInView, whileHover, whileTap, whileFocus,
-      viewport, layoutId, style, onAnimationStart,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      initial, animate, exit, transition, variants, whileInView,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      whileHover, whileTap, viewport, layoutId, onAnimationStart,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       onAnimationComplete, ...domProps
     } = rest;
-    /* eslint-enable @typescript-eslint/no-unused-vars */
     return React.createElement(tag, { style, ...domProps }, children);
   };
-
   return {
     motion: new Proxy({} as Record<string, unknown>, {
       get: (_: object, tag: string) => passthrough(tag),
@@ -41,238 +62,282 @@ vi.mock("motion/react", () => {
   };
 });
 
-// Mock image imports (Vite asset imports return module default)
-vi.mock("../assets/logo.png", () => ({ default: "/logo.png" }));
-vi.mock("../assets/hero.jpg", () => ({ default: "/hero.jpg" }));
-vi.mock("../assets/arte-na-palha.jpg", () => ({ default: "/arte-na-palha.jpg" }));
-vi.mock("../assets/natal-sertao.jpg", () => ({ default: "/natal-sertao.jpg" }));
+// ─── Mock de assets ───────────────────────────────────────────────────────────
 
-// Mock IntersectionObserver (unavailable in jsdom)
+vi.mock("../assets/logo.png",          () => ({ default: "/logo.png" }));
+vi.mock("../assets/hero.jpg",          () => ({ default: "/hero.jpg" }));
+vi.mock("../assets/arte-na-palha.jpg", () => ({ default: "/arte.jpg" }));
+vi.mock("../assets/natal-sertao.jpg",  () => ({ default: "/natal.jpg" }));
+
+// ─── Stubs globais ────────────────────────────────────────────────────────────
+
 beforeAll(() => {
-  const mockObserver = {
+  vi.stubGlobal("IntersectionObserver", vi.fn(() => ({
     observe: vi.fn(),
     unobserve: vi.fn(),
     disconnect: vi.fn(),
-  };
-  vi.stubGlobal("IntersectionObserver", vi.fn(() => mockObserver));
+  })));
+});
+
+beforeEach(() => {
+  storeOverride = {};
+  vi.clearAllMocks();
 });
 
 // ─── Helper ──────────────────────────────────────────────────────────────────
 
 function renderPage() {
-  return render(<HomePage />);
+  return render(
+    <MemoryRouter>
+      <HomePage />
+    </MemoryRouter>
+  );
 }
 
-// ─── Tests ───────────────────────────────────────────────────────────────────
+// ─── Testes ──────────────────────────────────────────────────────────────────
 
-describe("HomePage — structural integrity", () => {
-  it("renders without crashing", () => {
+describe("HomePage — estrutura", () => {
+  it("renderiza sem erros", () => {
     expect(() => renderPage()).not.toThrow();
   });
 
-  it("has exactly one <h1>", () => {
+  it("chama fetchTrabalhos, fetchNoticias e fetchPortfolio ao montar", () => {
     renderPage();
-    const headings = screen.getAllByRole("heading", { level: 1 });
-    expect(headings).toHaveLength(1);
+    expect(mockFetchTrabalhos).toHaveBeenCalledWith(1);
+    expect(mockFetchNoticias).toHaveBeenCalledWith(1);
+    expect(mockFetchPortfolio).toHaveBeenCalledWith(1);
   });
 
-  it("renders the sr-only 'Histórias' text inside h1", () => {
+  it("tem exatamente um <h1>", () => {
     renderPage();
-    const h1 = screen.getByRole("heading", { level: 1 });
-    // The h1 accessible text includes both the sr-only "Histórias" and "que respiram."
-    expect(h1.textContent).toMatch(/histórias/i);
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
   });
 
-  it("renders the italic hero subtitle inside h1", () => {
+  it("h1 contém 'Histórias'", () => {
+    renderPage();
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toMatch(/histórias/i);
+  });
+
+  it("h1 contém 'que respiram'", () => {
     renderPage();
     const h1 = screen.getByRole("heading", { level: 1 });
-    // The span "que respiram." is INSIDE the h1 — search within it
     expect(within(h1).getByText(/que respiram/i)).toBeInTheDocument();
   });
 
-  it("renders the hero description paragraph", () => {
+  it("renderiza parágrafo de descrição hero", () => {
     renderPage();
-    expect(
-      screen.getByText(/animação, narrativa e identidade nordestina/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/animação, narrativa e identidade nordestina/i)).toBeInTheDocument();
   });
 });
 
-describe("HomePage — navigation", () => {
-  it("renders the desktop nav with all items", () => {
+describe("HomePage — navegação", () => {
+  it("renderiza nav principal com todos os itens", () => {
     renderPage();
     const nav = screen.getByRole("navigation", { name: /navegação principal/i });
-    NAV_ITEMS.forEach(({ label }) => {
-      expect(within(nav).getByText(label)).toBeInTheDocument();
-    });
+    ["Início", "Trabalhos", "Equipe", "Portfólio", "Institucional", "Notícias", "Contato"].forEach(
+      (label) => expect(within(nav).getByText(label)).toBeInTheDocument()
+    );
   });
 
-  it("renders the 'Fale conosco' CTA link pointing to #contato", () => {
+  it("link 'Fale conosco' aponta para /#contato", () => {
     renderPage();
-    const cta = screen.getByRole("link", { name: /fale conosco/i });
-    expect(cta).toHaveAttribute("href", "#contato");
+    expect(screen.getByRole("link", { name: /fale conosco/i })).toHaveAttribute("href", "/#contato");
   });
 
-  it("renders footer nav links (excluding Início)", () => {
+  it("footer tem nav com links (exceto Início)", () => {
     renderPage();
     const footer = screen.getByRole("contentinfo");
     const footerNav = within(footer).getByRole("navigation", { name: /links do rodapé/i });
-    NAV_ITEMS.slice(1).forEach(({ label }) => {
-      expect(within(footerNav).getByText(label)).toBeInTheDocument();
-    });
+    ["Trabalhos", "Equipe", "Portfólio", "Institucional", "Notícias", "Contato"].forEach(
+      (label) => expect(within(footerNav).getByText(label)).toBeInTheDocument()
+    );
   });
 });
 
-describe("HomePage — sections", () => {
-  it("renders the Hero section landmark", () => {
-    renderPage();
-    expect(screen.getByRole("region", { name: /início/i })).toBeInTheDocument();
-  });
-
-  it("renders the Trabalhos section", () => {
+describe("HomePage — seção Trabalhos", () => {
+  it("renderiza seção de trabalhos", () => {
     renderPage();
     expect(screen.getByRole("region", { name: /trabalhos em destaque/i })).toBeInTheDocument();
   });
 
-  it("renders both production titles as h3 headings", () => {
+  it("exibe skeleton enquanto carrega", () => {
+    storeOverride = { trabalhos: { items: [], loading: true, error: null, currentPage: 1, lastPage: 1 } };
     renderPage();
-    expect(
-      screen.getByRole("heading", { name: /^arte na palha$/i, level: 3 })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: /^um natal no sertão$/i, level: 3 })
-    ).toBeInTheDocument();
+    // Skeleton: dois blocos animate-pulse
+    const pulses = document.querySelectorAll(".animate-pulse");
+    expect(pulses.length).toBeGreaterThan(0);
   });
 
-  it("renders 'Assistir trailer' buttons for each production", () => {
+  it("exibe mensagem vazia quando não há trabalhos", () => {
     renderPage();
-    const trailerButtons = screen.getAllByRole("button", { name: /assistir trailer/i });
-    expect(trailerButtons).toHaveLength(2);
+    expect(screen.getByText(/nenhum trabalho disponível/i)).toBeInTheDocument();
   });
 
-  it("renders the Equipe section", () => {
+  it("renderiza cards de trabalhos vindos da store", () => {
+    storeOverride = {
+      trabalhos: {
+        items: [
+          { id: 1, slug: "filme-a", titulo: "Filme A", resumo: "Resumo A", categoria: "Curta" },
+          { id: 2, slug: "filme-b", titulo: "Filme B", resumo: "Resumo B" },
+        ],
+        loading: false, error: null, currentPage: 1, lastPage: 1,
+      },
+    };
     renderPage();
-    expect(screen.getByRole("region", { name: /equipe/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /filme a/i, level: 3 })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /filme b/i, level: 3 })).toBeInTheDocument();
   });
 
-  it("renders team member roles scoped inside the Equipe section", () => {
+  it("exibe no máximo 2 destaques mesmo com mais itens na store", () => {
+    storeOverride = {
+      trabalhos: {
+        items: [1, 2, 3].map((n) => ({ id: n, slug: `filme-${n}`, titulo: `Filme ${n}`, resumo: "." })),
+        loading: false, error: null, currentPage: 1, lastPage: 1,
+      },
+    };
     renderPage();
-    const equipe = screen.getByRole("region", { name: /equipe/i });
-    // Use getAllByText inside the section — roles should appear exactly once each
-    expect(within(equipe).getAllByText("Direção")).toHaveLength(1);
-    expect(within(equipe).getAllByText("Animação 2D")).toHaveLength(1);
-    expect(within(equipe).getAllByText("Produção")).toHaveLength(1);
+    // Apenas 2 links "Ficha técnica completa" devem aparecer na seção home
+    const links = screen.getAllByText(/ficha técnica completa/i);
+    expect(links).toHaveLength(2);
   });
+});
 
-  it("renders the Portfólio section", () => {
+describe("HomePage — seção Portfólio", () => {
+  it("renderiza seção portfólio", () => {
     renderPage();
     expect(screen.getByRole("region", { name: /portfólio/i })).toBeInTheDocument();
   });
 
-  it("renders all 4 portfolio items in a list", () => {
+  it("exibe mensagem vazia quando não há projetos", () => {
+    renderPage();
+    expect(screen.getByText(/nenhum projeto no portfólio/i)).toBeInTheDocument();
+  });
+
+  it("renderiza itens de portfólio vindos da store (máx 4)", () => {
+    storeOverride = {
+      portfolio: {
+        items: [1, 2, 3, 4, 5].map((n) => ({
+          id: n, slug: `projeto-${n}`, titulo: `Projeto ${n}`, resumo: ".",
+        })),
+        loading: false, error: null, currentPage: 1, lastPage: 1,
+      },
+    };
     renderPage();
     const list = screen.getByRole("list", { name: /lista de projetos/i });
-    const items = within(list).getAllByRole("listitem");
-    expect(items).toHaveLength(4);
+    expect(within(list).getAllByRole("listitem")).toHaveLength(4);
   });
+});
 
-  it("renders portfolio item titles", () => {
+describe("HomePage — seção Notícias", () => {
+  it("renderiza seção de notícias", () => {
     renderPage();
-    expect(screen.getByText("Microcuriosidades")).toBeInTheDocument();
-    expect(screen.getByText("Projeto Em Desenvolvimento")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: /notícias/i })).toBeInTheDocument();
   });
 
-  it("renders the Institucional section with Missão/Visão/Valores headings", () => {
+  it("exibe mensagem vazia quando não há notícias", () => {
+    renderPage();
+    expect(screen.getByText(/nenhuma notícia publicada/i)).toBeInTheDocument();
+  });
+
+  it("renderiza cards de notícias vindos da store (máx 3)", () => {
+    storeOverride = {
+      noticias: {
+        items: [1, 2, 3, 4].map((n) => ({
+          id: n, slug: `noticia-${n}`, titulo: `Notícia ${n}`,
+          resumo: ".", autor: "Autor", data: "2026-01-01", categoria: "Lançamento", tags: [],
+        })),
+        loading: false, error: null, currentPage: 1, lastPage: 1,
+      },
+    };
+    renderPage();
+    expect(screen.getAllByRole("article")).toHaveLength(3);
+  });
+});
+
+describe("HomePage — seção Equipe", () => {
+  it("renderiza seção equipe", () => {
+    renderPage();
+    expect(screen.getByRole("region", { name: /equipe/i })).toBeInTheDocument();
+  });
+
+  it("renderiza todos os membros da equipe", () => {
+    renderPage();
+    const equipe = screen.getByRole("region", { name: /equipe/i });
+    expect(within(equipe).getAllByText("Direção")).toHaveLength(1);
+    expect(within(equipe).getAllByText("Animação 2D")).toHaveLength(1);
+    expect(within(equipe).getAllByText("Produção")).toHaveLength(1);
+  });
+});
+
+describe("HomePage — seção Institucional", () => {
+  it("renderiza seção institucional com Missão/Visão/Valores", () => {
     renderPage();
     expect(screen.getByRole("region", { name: /institucional/i })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /missão/i, level: 3 })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /visão/i, level: 3 })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /valores/i, level: 3 })).toBeInTheDocument();
   });
+});
 
-  it("renders the Notícias section with 3 articles", () => {
-    renderPage();
-    expect(screen.getByRole("region", { name: /notícias/i })).toBeInTheDocument();
-    const articles = screen.getAllByRole("article");
-    expect(articles).toHaveLength(3);
-  });
-
-  it("renders news article headings", () => {
-    renderPage();
-    expect(
-      screen.getByRole("heading", { name: /arte na palha estreia em mostra/i, level: 3 })
-    ).toBeInTheDocument();
-  });
-
-  it("renders the Contato section with email link", () => {
+describe("HomePage — seção Contato", () => {
+  it("renderiza seção contato", () => {
     renderPage();
     expect(screen.getByRole("region", { name: /contato/i })).toBeInTheDocument();
-    const emailLink = screen.getByRole("link", {
-      name: /contato@argumentoproducoes\.com\.br/i,
-    });
-    expect(emailLink).toHaveAttribute("href", "mailto:contato@argumentoproducoes.com.br");
   });
 
-  it("renders social media links (Instagram and YouTube)", () => {
+  it("link de e-mail correto", () => {
     renderPage();
     expect(
-      screen.getByRole("link", { name: /instagram da argumento/i })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /youtube da argumento/i })
-    ).toBeInTheDocument();
+      screen.getByRole("link", { name: /contato@argumentoproducoes\.com\.br/i })
+    ).toHaveAttribute("href", "mailto:contato@argumentoproducoes.com.br");
+  });
+
+  it("links de redes sociais presentes", () => {
+    renderPage();
+    expect(screen.getByRole("link", { name: /instagram da argumento/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /youtube da argumento/i })).toBeInTheDocument();
   });
 });
 
 describe("HomePage — footer", () => {
-  it("renders contentinfo landmark", () => {
+  it("renderiza contentinfo", () => {
     renderPage();
     expect(screen.getByRole("contentinfo")).toBeInTheDocument();
   });
 
-  it("shows copyright with current year inside <small>", () => {
+  it("copyright com ano atual", () => {
     renderPage();
-    const footer = screen.getByRole("contentinfo");
-    const small = footer.querySelector("small");
-    expect(small).not.toBeNull();
+    const small = screen.getByRole("contentinfo").querySelector("small");
     expect(small?.textContent).toMatch(new RegExp(new Date().getFullYear().toString()));
     expect(small?.textContent).toMatch(/argumento produções/i);
   });
 });
 
-describe("SectionLabel helper", () => {
-  it("renders the label text", () => {
-    render(<SectionLabel icon={<span data-testid="icon" />} label="Em destaque" />);
+describe("SectionLabel", () => {
+  it("renderiza o label", () => {
+    render(<SectionLabel icon={<span />} label="Em destaque" />);
     expect(screen.getByText("Em destaque")).toBeInTheDocument();
   });
 
-  it("applies light styles when dark is false (default)", () => {
-    const { container } = render(
-      <SectionLabel icon={<span />} label="Vitrine" />
-    );
+  it("estilo claro por padrão (dark=false)", () => {
+    const { container } = render(<SectionLabel icon={<span />} label="x" />);
     expect(container.firstChild).toHaveClass("bg-brand-ink");
   });
 
-  it("applies dark styles when dark=true", () => {
-    const { container } = render(
-      <SectionLabel icon={<span />} label="Institucional" dark />
-    );
+  it("estilo escuro quando dark=true", () => {
+    const { container } = render(<SectionLabel icon={<span />} label="x" dark />);
     expect(container.firstChild).toHaveClass("bg-brand-cream/10");
   });
 });
 
-describe("SectionTitle helper", () => {
-  it("renders children inside an h2", () => {
+describe("SectionTitle", () => {
+  it("renderiza filhos em h2", () => {
     render(<SectionTitle>Portfólio completo.</SectionTitle>);
-    expect(
-      screen.getByRole("heading", { name: /portfólio completo/i, level: 2 })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /portfólio completo/i, level: 2 })).toBeInTheDocument();
   });
 
-  it("applies dark text color when dark=true", () => {
-    const { container } = render(
-      <SectionTitle dark>Quem somos</SectionTitle>
-    );
+  it("aplica cor clara quando dark=true", () => {
+    const { container } = render(<SectionTitle dark>Quem somos</SectionTitle>);
     expect(container.firstChild).toHaveClass("text-brand-cream");
   });
 });

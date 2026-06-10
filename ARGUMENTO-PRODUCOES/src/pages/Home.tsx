@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   Play,
@@ -15,83 +15,26 @@ import {
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import hero from "@/assets/hero.jpg";
-import artePalha from "@/assets/arte-na-palha.jpg";
-import natalSertao from "@/assets/natal-sertao.jpg";
 import { Layout } from "@/components/Layout";
 import { Avatar } from "@/components/Avatar";
-import { TEAM_MEMBERS, NEWS_DATABASE } from "@/data";
-
-/* ------------------------------------------------------------------ */
-/* Constants                                                            */
-/* ------------------------------------------------------------------ */
-
-export const NAV_ITEMS = [
-  { id: "inicio", label: "Início" },
-  { id: "trabalhos", label: "Trabalhos" },
-  { id: "equipe", label: "Equipe" },
-  { id: "portfolio", label: "Portfólio" },
-  { id: "institucional", label: "Institucional" },
-  { id: "noticias", label: "Notícias" },
-  { id: "contato", label: "Contato" },
-] as const;
-
-const PRODUCTIONS = [
-  {
-    title: "Arte na Palha",
-    logline:
-      "Em uma vila esquecida do sertão, dois irmãos descobrem que tecer palha pode reescrever o destino da própria família.",
-    tag: "Curta-metragem · Animação 2D",
-    img: artePalha,
-    color: "#F38615",
-  },
-  {
-    title: "Um Natal no Sertão",
-    logline:
-      "Uma noite mágica transforma a caatinga em palco para um milagre simples, contado por estrelas e violas.",
-    tag: "Especial · Animação 2D",
-    img: natalSertao,
-    color: "#F7511D",
-  },
-] as const;
-
-const TEAM = [
-  { name: "Diretor(a) Geral", role: "Direção" },
-  { name: "Roteirista Chefe", role: "Argumento" },
-  { name: "Diretor(a) de Arte", role: "Arte e Design" },
-  { name: "Animador(a) Principal", role: "Animação 2D" },
-  { name: "Produtor(a) Executivo", role: "Produção" },
-  { name: "Designer de Som", role: "Trilha e Som" },
-] as const;
-
-const PORTFOLIO_ITEMS = [
-  { title: "Arte na Palha", year: "2024", type: "Curta · Animação", festival: "Festival de Gramado", portfolioId: "portfolio-arte-na-palha" },
-  { title: "Um Natal no Sertão", year: "2023", type: "Especial · Animação", festival: "Mostra Cinesertão", portfolioId: "portfolio-um-natal-no-sertao" },
-  { title: "Projeto Em Desenvolvimento", year: "2026", type: "Longa · Animação", festival: "—", portfolioId: "portfolio-projeto-desenvolvimento" },
-  { title: "Microcuriosidades", year: "2022", type: "Série Web", festival: "—", portfolioId: "portfolio-microcuriosidades" },
-] as const;
-
-const INSTITUTION_VALUES = [
-  {
-    title: "Missão",
-    text: "Produzir animações e narrativas que valorizam a cultura, a memória e a imaginação brasileira — com qualidade artística e responsabilidade social.",
-  },
-  {
-    title: "Visão",
-    text: "Ser referência nacional em animação autoral e produção audiovisual, conectando o sertão ao mundo através de histórias universais.",
-  },
-  {
-    title: "Valores",
-    text: "Autenticidade, colaboração, excelência técnica, respeito à diversidade e amor por contar boas histórias.",
-  },
-] as const;
-
-
+import { TEAM_MEMBERS, MARQUEE_ITEMS, INSTITUTION_VALUES } from "@/data";
+import { useAppStore } from "@/store/useAppStore";
+import type { ApiTrabalho } from "@/lib/api";
 
 /* ------------------------------------------------------------------ */
 /* Root                                                                 */
 /* ------------------------------------------------------------------ */
 
 export default function HomePage() {
+  // Carrega dados ao entrar na home
+  const { fetchTrabalhos, fetchNoticias, fetchPortfolio } = useAppStore();
+
+  useEffect(() => {
+    fetchTrabalhos(1);
+    fetchNoticias(1);
+    fetchPortfolio(1);
+  }, [fetchTrabalhos, fetchNoticias, fetchPortfolio]);
+
   return (
     <Layout>
       <Hero />
@@ -103,106 +46,6 @@ export default function HomePage() {
       <Noticias />
       <Contato />
     </Layout>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Nav                                                                  */
-/* ------------------------------------------------------------------ */
-
-function Nav({ scrolled, active }: { scrolled: boolean; active: string }) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <motion.header
-      initial={{ y: -40, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "bg-brand-cream/85 backdrop-blur-xl border-b border-black/5"
-          : "bg-transparent"
-      }`}
-      role="banner"
-    >
-      <div className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between h-20">
-        {/* Logo */}
-        <a href="#inicio" className="flex items-center gap-3 group" aria-label="Argumento Produções — Início">
-          <img src={logo} alt="Argumento Produções" className="h-11 w-11 object-contain" />
-          <div className="hidden sm:block leading-tight">
-            <div className="font-display font-black text-lg tracking-tight">Argumento</div>
-            <div className="text-[10px] tracking-[0.3em] uppercase text-brand-ink/60">Produções</div>
-          </div>
-        </a>
-
-        {/* Desktop nav */}
-        <nav className="hidden lg:flex items-center gap-1" aria-label="Navegação principal">
-          {NAV_ITEMS.map((n) => (
-            <a
-              key={n.id}
-              href={`#${n.id}`}
-              className="relative px-4 py-2 text-sm font-medium text-brand-ink/75 hover:text-brand-ink transition-colors"
-              aria-current={active === n.id ? "page" : undefined}
-            >
-              {n.label}
-              {active === n.id && (
-                <motion.span
-                  layoutId="nav-pill"
-                  className="absolute inset-0 -z-10 rounded-full bg-brand-butter"
-                  transition={{ type: "spring", stiffness: 400, damping: 32 }}
-                />
-              )}
-            </a>
-          ))}
-        </nav>
-
-        <a
-          href="#contato"
-          className="hidden lg:inline-flex items-center gap-2 rounded-full bg-brand-ink text-brand-cream text-sm font-semibold px-5 py-2.5 hover:bg-brand-orange transition-colors"
-        >
-          Fale conosco <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-        </a>
-
-        {/* Hamburger */}
-        <button
-          onClick={() => setOpen((o) => !o)}
-          className="lg:hidden p-2 rounded-md"
-          aria-label={open ? "Fechar menu" : "Abrir menu"}
-          aria-expanded={open}
-          aria-controls="mobile-nav"
-        >
-          <span className="sr-only">{open ? "Fechar" : "Menu"}</span>
-          <div className="space-y-1.5" aria-hidden="true">
-            <span className={`block h-0.5 w-6 bg-brand-ink transition-transform ${open ? "translate-y-2 rotate-45" : ""}`} />
-            <span className={`block h-0.5 w-6 bg-brand-ink transition-opacity ${open ? "opacity-0" : ""}`} />
-            <span className={`block h-0.5 w-6 bg-brand-ink transition-transform ${open ? "-translate-y-2 -rotate-45" : ""}`} />
-          </div>
-        </button>
-      </div>
-
-      {open && (
-        <motion.div
-          id="mobile-nav"
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: "auto", opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
-          className="lg:hidden bg-brand-cream border-t border-black/5 overflow-hidden"
-        >
-          <nav className="px-6 py-4 flex flex-col gap-1" aria-label="Navegação mobile">
-            {NAV_ITEMS.map((n) => (
-              <a
-                key={n.id}
-                href={`#${n.id}`}
-                onClick={() => setOpen(false)}
-                className="py-3 text-base font-medium border-b border-black/5"
-              >
-                {n.label}
-              </a>
-            ))}
-          </nav>
-        </motion.div>
-      )}
-    </motion.header>
   );
 }
 
@@ -327,8 +170,6 @@ function Hero() {
 /* Marquee                                                              */
 /* ------------------------------------------------------------------ */
 
-const MARQUEE_ITEMS = ["Animação", "Narrativa", "Roteiro", "Sertão", "Cultura", "Direção", "Produção", "Identidade"];
-
 function Marquee() {
   const repeated = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS, ...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
   return (
@@ -352,33 +193,7 @@ function Marquee() {
 /* Trabalhos                                                            */
 /* ------------------------------------------------------------------ */
 
-function Trabalhos() {
-  return (
-    <section id="trabalhos" className="relative py-28 lg:py-40 bg-brand-cream" aria-label="Trabalhos em destaque">
-      <div className="max-w-7xl mx-auto px-6 lg:px-10">
-        <SectionLabel icon={<Film className="h-3.5 w-3.5" aria-hidden="true" />} label="Em destaque" />
-        <SectionTitle>
-          Produções <span className="italic text-gradient-warm">que marcam</span>.
-        </SectionTitle>
-        <div className="mt-20 space-y-32">
-          {PRODUCTIONS.map((p, i) => (
-            <ProductionRow key={p.title} prod={p} reverse={i % 2 === 1} index={i} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ProductionRow({
-  prod,
-  reverse,
-  index,
-}: {
-  prod: typeof PRODUCTIONS[number];
-  reverse: boolean;
-  index: number;
-}) {
+function TrabalhoRow({ prod, index }: { prod: ApiTrabalho; index: number; currentPage: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], [60, -60]);
@@ -391,7 +206,7 @@ function ProductionRow({
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
       className={`grid lg:grid-cols-12 gap-10 lg:gap-16 items-center ${
-        reverse ? "lg:[&>*:first-child]:order-2" : ""
+        index % 2 === 1 ? "lg:[&>*:first-child]:order-2" : ""
       }`}
     >
       <div className="lg:col-span-7 relative group">
@@ -399,25 +214,32 @@ function ProductionRow({
           style={{ y }}
           className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-brand-butter will-change-transform"
         >
-          <img
-            src={prod.img}
-            alt={prod.title}
-            loading="lazy"
-            className="w-full h-full object-cover transition-transform duration-[1.4s] group-hover:scale-105"
-          />
+          {prod.capa?.url ? (
+            <img
+              src={prod.capa.url}
+              alt={prod.titulo}
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-[1.4s] group-hover:scale-105"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-brand-butter/50">
+              <Film className="h-16 w-16 text-brand-ink/20" aria-hidden="true" />
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-brand-ink/60 via-transparent" />
-          <div className="absolute top-6 left-6 flex items-center gap-2 rounded-full bg-brand-cream/95 backdrop-blur px-4 py-1.5 text-xs font-semibold uppercase tracking-wider">
-            <span className="h-2 w-2 rounded-full animate-pulse" style={{ background: prod.color }} aria-hidden="true" />
-            Trailer disponível
-          </div>
-          <button
-            className="absolute inset-0 grid place-items-center"
-            aria-label={`Assistir trailer de ${prod.title}`}
-          >
-            <span className="grid h-20 w-20 place-items-center rounded-full bg-brand-cream/90 backdrop-blur shadow-2xl group-hover:scale-110 transition-transform">
-              <Play className="h-6 w-6 fill-brand-ink text-brand-ink ml-1" aria-hidden="true" />
-            </span>
-          </button>
+          {prod.trailer_url && (
+            <a
+              href={prod.trailer_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute inset-0 grid place-items-center"
+              aria-label={`Assistir trailer de ${prod.titulo}`}
+            >
+              <span className="grid h-20 w-20 place-items-center rounded-full bg-brand-cream/90 backdrop-blur shadow-2xl group-hover:scale-110 transition-transform">
+                <Play className="h-6 w-6 fill-brand-ink text-brand-ink ml-1" aria-hidden="true" />
+              </span>
+            </a>
+          )}
         </motion.div>
       </div>
 
@@ -425,22 +247,79 @@ function ProductionRow({
         <div className="text-7xl font-display font-black text-brand-butter leading-none mb-4" aria-hidden="true">
           0{index + 1}
         </div>
-        <div className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-orange mb-4">
-          {prod.tag}
-        </div>
+        {prod.categoria && (
+          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-orange mb-4">
+            {prod.categoria}
+          </div>
+        )}
         <h3 className="font-display text-4xl lg:text-6xl font-black leading-[0.95] tracking-tight mb-6">
-          {prod.title}
+          {prod.titulo}
         </h3>
-        <p className="text-lg text-brand-ink/75 leading-relaxed mb-8">{prod.logline}</p>
-        <a
-          href="#portfolio"
+        <p className="text-lg text-brand-ink/75 leading-relaxed mb-8">{prod.resumo}</p>
+        <Link
+          to={`/trabalhos/${prod.slug}`}
           className="inline-flex items-center gap-2 font-semibold border-b-2 border-brand-ink pb-1 hover:border-brand-orange hover:text-brand-orange transition-colors"
         >
           Ficha técnica completa
           <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-        </a>
+        </Link>
       </div>
     </motion.div>
+  );
+}
+
+function Trabalhos() {
+  const { trabalhos } = useAppStore();
+  const { items, loading } = trabalhos;
+
+  // Exibe até 2 destaques na home
+  const destaques = items.slice(0, 2);
+
+  return (
+    <section id="trabalhos" className="relative py-28 lg:py-40 bg-brand-cream" aria-label="Trabalhos em destaque">
+      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+        <SectionLabel icon={<Film className="h-3.5 w-3.5" aria-hidden="true" />} label="Em destaque" />
+        <SectionTitle>
+          Produções <span className="italic text-gradient-warm">que marcam</span>.
+        </SectionTitle>
+
+        {loading && (
+          <div className="mt-20 space-y-16">
+            {[1, 2].map((i) => (
+              <div key={i} className="grid lg:grid-cols-12 gap-8 animate-pulse">
+                <div className="lg:col-span-7 aspect-[4/3] rounded-3xl bg-brand-ink/10" />
+                <div className="lg:col-span-5 flex flex-col justify-center gap-4">
+                  <div className="h-3 w-24 rounded-full bg-brand-ink/10" />
+                  <div className="h-10 w-3/4 rounded-xl bg-brand-ink/10" />
+                  <div className="h-4 w-full rounded bg-brand-ink/10" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!loading && destaques.length === 0 && (
+          <p className="mt-20 text-brand-ink/50 text-center">Nenhum trabalho disponível no momento.</p>
+        )}
+
+        {!loading && destaques.length > 0 && (
+          <div className="mt-20 space-y-32">
+            {destaques.map((prod, i) => (
+              <TrabalhoRow key={prod.id} prod={prod} index={i} currentPage={1} />
+            ))}
+          </div>
+        )}
+
+        <div className="mt-16 text-center">
+          <Link
+            to="/trabalhos"
+            className="inline-flex items-center gap-2 rounded-full bg-brand-ink text-brand-cream font-semibold px-6 py-3 hover:bg-brand-orange transition-colors"
+          >
+            Ver todas as produções <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -502,6 +381,10 @@ function Equipe() {
 /* ------------------------------------------------------------------ */
 
 function Portfolio() {
+  const { portfolio } = useAppStore();
+  const { items, loading } = portfolio;
+  const destaques = items.slice(0, 4);
+
   return (
     <section id="portfolio" className="py-28 lg:py-40 bg-brand-cream" aria-label="Portfólio">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
@@ -510,36 +393,64 @@ function Portfolio() {
           Portfólio <span className="italic text-gradient-warm">completo</span>.
         </SectionTitle>
 
-        <div className="mt-16 border-t border-brand-ink/15" role="list" aria-label="Lista de projetos">
-          {PORTFOLIO_ITEMS.map((p, i) => (
-            <motion.div
-              key={p.title}
-              role="listitem"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.05 }}
-            >
-              <Link
-                to={`/portfolio/${p.portfolioId}`}
-                className="group grid grid-cols-12 gap-4 items-center py-8 border-b border-brand-ink/15 hover:bg-brand-butter/50 px-4 -mx-4 rounded-xl transition-colors"
-                aria-label={`${p.title} — ${p.type}, ${p.year}`}
+        {loading && (
+          <div className="mt-16 space-y-0 border-t border-brand-ink/15">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="animate-pulse grid grid-cols-12 gap-4 py-8 border-b border-brand-ink/15">
+                <div className="col-span-1 h-4 bg-brand-ink/10 rounded" />
+                <div className="col-span-5 h-8 bg-brand-ink/10 rounded-xl" />
+                <div className="col-span-3 h-4 bg-brand-ink/10 rounded" />
+                <div className="col-span-3 h-4 bg-brand-ink/10 rounded" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!loading && destaques.length === 0 && (
+          <p className="mt-16 text-brand-ink/50 text-center">Nenhum projeto no portfólio ainda.</p>
+        )}
+
+        {!loading && destaques.length > 0 && (
+          <div className="mt-16 border-t border-brand-ink/15" role="list" aria-label="Lista de projetos">
+            {destaques.map((p, i) => (
+              <motion.div
+                key={p.id}
+                role="listitem"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.05 }}
               >
-                <div className="col-span-1 text-xs text-brand-ink/50 font-mono" aria-hidden="true">
-                  0{i + 1}
-                </div>
-                <div className="col-span-12 md:col-span-5 font-display text-2xl md:text-4xl font-black tracking-tight group-hover:text-brand-orange transition-colors">
-                  {p.title}
-                </div>
-                <div className="col-span-6 md:col-span-3 text-sm text-brand-ink/70">{p.type}</div>
-                <div className="col-span-4 md:col-span-2 text-sm text-brand-ink/70">{p.festival}</div>
-                <div className="col-span-2 md:col-span-1 flex justify-end items-center gap-2 font-semibold">
-                  {p.year}
-                  <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" aria-hidden="true" />
-                </div>
-              </Link>
-            </motion.div>
-          ))}
+                <Link
+                  to={`/portfolio/${p.slug}`}
+                  className="group grid grid-cols-12 gap-4 items-center py-8 border-b border-brand-ink/15 hover:bg-brand-butter/50 px-4 -mx-4 rounded-xl transition-colors"
+                  aria-label={`${p.titulo} — ${p.categoria ?? ""}, ${p.ano ?? ""}`}
+                >
+                  <div className="col-span-1 text-xs text-brand-ink/50 font-mono" aria-hidden="true">
+                    0{i + 1}
+                  </div>
+                  <div className="col-span-12 md:col-span-5 font-display text-2xl md:text-4xl font-black tracking-tight group-hover:text-brand-orange transition-colors">
+                    {p.titulo}
+                  </div>
+                  <div className="col-span-6 md:col-span-3 text-sm text-brand-ink/70">{p.categoria ?? "—"}</div>
+                  <div className="col-span-4 md:col-span-2 text-sm text-brand-ink/70">{p.festival ?? "—"}</div>
+                  <div className="col-span-2 md:col-span-1 flex justify-end items-center gap-2 font-semibold">
+                    {p.ano ?? "—"}
+                    <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" aria-hidden="true" />
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-10 text-center">
+          <Link
+            to="/portfolio"
+            className="inline-flex items-center gap-2 font-semibold border-b-2 border-brand-ink pb-1 hover:border-brand-orange hover:text-brand-orange transition-colors"
+          >
+            Ver portfólio completo <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
         </div>
       </div>
     </section>
@@ -605,7 +516,19 @@ function Institucional() {
 /* Notícias                                                             */
 /* ------------------------------------------------------------------ */
 
+const TAG_COLORS: Record<string, string> = {
+  Web: "bg-brand-orange text-brand-cream",
+  Lançamento: "bg-brand-orange text-brand-cream",
+  Bastidores: "bg-brand-butter text-brand-ink",
+  "Em produção": "bg-brand-ember text-brand-cream",
+  Social: "bg-brand-ink text-brand-cream",
+};
+
 function Noticias() {
+  const { noticias } = useAppStore();
+  const { items, loading } = noticias;
+  const destaques = items.slice(0, 3);
+
   return (
     <section id="noticias" className="py-28 lg:py-40 bg-brand-butter" aria-label="Notícias">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
@@ -624,35 +547,58 @@ function Noticias() {
           </Link>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {NEWS_DATABASE.slice(0, 3).map((n, i) => (
-            <motion.article
-              key={n.id}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.08 }}
-            >
-              <Link
-                to={`/noticias/${n.id}`}
-                className="group flex flex-col h-full p-7 rounded-3xl bg-brand-cream hover:bg-brand-ink hover:text-brand-cream transition-all duration-500 cursor-pointer"
-              >
-                <div className="flex items-center justify-between text-xs uppercase tracking-wider mb-8">
-                  <time className="font-mono opacity-60" dateTime={n.date}>{n.date}</time>
-                  <span className="px-3 py-1 rounded-full bg-brand-orange text-brand-cream font-bold">
-                    {n.tag}
-                  </span>
-                </div>
-                <h3 className="font-display text-2xl font-black leading-tight mb-4 flex-1">{n.title}</h3>
-                <p className="text-sm leading-relaxed opacity-75 mb-6">{n.excerpt}</p>
-                <div className="inline-flex items-center gap-2 text-sm font-semibold">
-                  Ler matéria
-                  <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" aria-hidden="true" />
-                </div>
-              </Link>
-            </motion.article>
-          ))}
-        </div>
+        {loading && (
+          <div className="grid md:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="p-7 rounded-3xl bg-brand-cream/50 animate-pulse space-y-4">
+                <div className="h-3 w-20 bg-brand-ink/10 rounded" />
+                <div className="h-7 w-full bg-brand-ink/10 rounded-xl" />
+                <div className="h-4 w-full bg-brand-ink/10 rounded" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!loading && destaques.length === 0 && (
+          <p className="text-brand-ink/50 text-center py-10">Nenhuma notícia publicada ainda.</p>
+        )}
+
+        {!loading && destaques.length > 0 && (
+          <div className="grid md:grid-cols-3 gap-6">
+            {destaques.map((n, i) => {
+              const tagClass = TAG_COLORS[n.categoria] ?? "bg-brand-ink text-brand-cream";
+              return (
+                <motion.article
+                  key={n.id}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: i * 0.08 }}
+                >
+                  <Link
+                    to={`/noticias/${n.slug}`}
+                    className="group flex flex-col h-full p-7 rounded-3xl bg-brand-cream hover:bg-brand-ink hover:text-brand-cream transition-all duration-500"
+                  >
+                    <div className="flex items-center justify-between text-xs uppercase tracking-wider mb-8">
+                      <time className="font-mono opacity-60" dateTime={n.data}>
+                        {new Date(n.data).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+                      </time>
+                      <span className={`px-3 py-1 rounded-full font-bold ${tagClass}`}>
+                        {n.categoria}
+                      </span>
+                    </div>
+                    <h3 className="font-display text-2xl font-black leading-tight mb-4 flex-1">{n.titulo}</h3>
+                    <p className="text-sm leading-relaxed opacity-75 mb-6">{n.resumo}</p>
+                    <div className="inline-flex items-center gap-2 text-sm font-semibold">
+                      Ler matéria
+                      <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" aria-hidden="true" />
+                    </div>
+                  </Link>
+                </motion.article>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -757,39 +703,6 @@ function Contato() {
         </div>
       </div>
     </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Footer                                                               */
-/* ------------------------------------------------------------------ */
-
-function Footer() {
-  return (
-    <footer className="bg-brand-ink text-brand-cream py-16" role="contentinfo">
-      <div className="max-w-7xl mx-auto px-6 lg:px-10">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-10">
-          <div>
-            <div className="font-display font-black text-7xl md:text-9xl leading-none tracking-tighter">
-              <span className="text-gradient-warm italic">Argumento</span>
-            </div>
-            <div className="mt-2 text-xs uppercase tracking-[0.4em] text-brand-cream/50">
-              Produções · Animação · Narrativa
-            </div>
-          </div>
-          <div className="flex flex-col md:items-end gap-4 text-sm text-brand-cream/60">
-            <nav className="flex gap-6" aria-label="Links do rodapé">
-              {NAV_ITEMS.slice(1).map((n) => (
-                <a key={n.id} href={`#${n.id}`} className="hover:text-brand-orange transition-colors">
-                  {n.label}
-                </a>
-              ))}
-            </nav>
-            <small>© {new Date().getFullYear()} Argumento Produções. Todos os direitos reservados.</small>
-          </div>
-        </div>
-      </div>
-    </footer>
   );
 }
 

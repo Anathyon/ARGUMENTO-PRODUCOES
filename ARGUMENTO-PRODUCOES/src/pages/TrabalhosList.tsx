@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { Film, ArrowUpRight, Play } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { Pagination } from "@/components/Pagination";
-import { DATABASE_ITEMS, useFetchData } from "@/data";
+import { useAppStore } from "@/store/useAppStore";
 
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 6; // per_page definido pela API
 
 function LoadingSkeleton() {
   return (
@@ -18,7 +18,6 @@ function LoadingSkeleton() {
             <div className="h-3 w-24 rounded-full bg-brand-ink/10" />
             <div className="h-10 w-3/4 rounded-xl bg-brand-ink/10" />
             <div className="h-4 w-full rounded bg-brand-ink/10" />
-            <div className="h-4 w-5/6 rounded bg-brand-ink/10" />
           </div>
         </div>
       ))}
@@ -27,20 +26,16 @@ function LoadingSkeleton() {
 }
 
 export default function TrabalhosList() {
-  const [currentPage, setCurrentPage] = useState(1);
+  const { trabalhos, fetchTrabalhos } = useAppStore();
+  const { items, currentPage, lastPage, loading, error } = trabalhos;
 
-  const { data: items, loading } = useFetchData(
-    () => DATABASE_ITEMS.filter((item) => item.type === "trabalho"),
-    []
-  );
-
-  const totalPages = items ? Math.ceil(items.length / PAGE_SIZE) : 1;
-  const paginated = items
-    ? items.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
-    : [];
+  // Carrega ao entrar na página
+  useEffect(() => {
+    fetchTrabalhos(1);
+  }, [fetchTrabalhos]);
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    fetchTrabalhos(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -51,7 +46,7 @@ export default function TrabalhosList() {
         aria-label="Trabalhos e Produções"
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          {/* Page Header */}
+          {/* Cabeçalho */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -72,12 +67,24 @@ export default function TrabalhosList() {
             </p>
           </motion.div>
 
-          {/* Content */}
-          {loading ? (
-            <LoadingSkeleton />
-          ) : (
+          {/* Conteúdo */}
+          {loading && <LoadingSkeleton />}
+
+          {error && (
+            <p className="text-center text-brand-ink/60 py-20">
+              Não foi possível carregar os trabalhos. Tente novamente.
+            </p>
+          )}
+
+          {!loading && !error && items.length === 0 && (
+            <p className="text-center text-brand-ink/60 py-20">
+              Nenhum trabalho cadastrado ainda.
+            </p>
+          )}
+
+          {!loading && !error && items.length > 0 && (
             <div className="space-y-24">
-              {paginated.map((prod, i) => (
+              {items.map((prod, i) => (
                 <motion.div
                   key={prod.id}
                   initial={{ opacity: 0, y: 60 }}
@@ -90,25 +97,23 @@ export default function TrabalhosList() {
                   {/* Thumbnail */}
                   <div className="lg:col-span-7 relative group">
                     <div className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-brand-butter">
-                      <img
-                        src={prod.img}
-                        alt={prod.title}
-                        loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-[1.4s] group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-brand-ink/60 via-transparent" />
-                      <div className="absolute top-6 left-6 flex items-center gap-2 rounded-full bg-brand-cream/95 backdrop-blur px-4 py-1.5 text-xs font-semibold uppercase tracking-wider">
-                        <span
-                          className="h-2 w-2 rounded-full animate-pulse"
-                          style={{ background: prod.color }}
-                          aria-hidden="true"
+                      {prod.capa?.url ? (
+                        <img
+                          src={prod.capa.url}
+                          alt={prod.titulo}
+                          loading="lazy"
+                          className="w-full h-full object-cover transition-transform duration-[1.4s] group-hover:scale-105"
                         />
-                        Trailer disponível
-                      </div>
+                      ) : (
+                        <div className="w-full h-full bg-brand-butter/50 flex items-center justify-center">
+                          <Film className="h-16 w-16 text-brand-ink/20" aria-hidden="true" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-brand-ink/60 via-transparent" />
                       <Link
-                        to={`/trabalhos/${prod.id}`}
+                        to={`/trabalhos/${prod.slug}`}
                         className="absolute inset-0 grid place-items-center"
-                        aria-label={`Ver detalhes de ${prod.title}`}
+                        aria-label={`Ver detalhes de ${prod.titulo}`}
                       >
                         <span className="grid h-20 w-20 place-items-center rounded-full bg-brand-cream/90 backdrop-blur shadow-2xl group-hover:scale-110 transition-transform">
                           <Play className="h-6 w-6 fill-brand-ink text-brand-ink ml-1" aria-hidden="true" />
@@ -119,31 +124,29 @@ export default function TrabalhosList() {
 
                   {/* Info */}
                   <div className="lg:col-span-5">
-                    <div
-                      className="text-7xl font-display font-black leading-none mb-4"
-                      style={{ color: prod.color + "33" }}
-                      aria-hidden="true"
-                    >
+                    <div className="text-7xl font-display font-black leading-none mb-4 text-brand-butter/60" aria-hidden="true">
                       0{(currentPage - 1) * PAGE_SIZE + i + 1}
                     </div>
-                    <div className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-orange mb-4">
-                      {prod.tag}
-                    </div>
+                    {prod.categoria && (
+                      <div className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-orange mb-4">
+                        {prod.categoria}
+                      </div>
+                    )}
                     <h2 className="font-display text-4xl lg:text-5xl font-black leading-[0.95] tracking-tight mb-6">
-                      {prod.title}
+                      {prod.titulo}
                     </h2>
                     <p className="text-lg text-brand-ink/70 leading-relaxed mb-4">
-                      {prod.logline}
+                      {prod.resumo}
                     </p>
-                    {prod.year && (
+                    {prod.ano && (
                       <p className="text-sm text-brand-ink/50 mb-8">
-                        {prod.year}
-                        {prod.festival && prod.festival !== "—" ? ` · ${prod.festival}` : ""}
-                        {prod.duration ? ` · ${prod.duration}` : ""}
+                        {prod.ano}
+                        {prod.festival ? ` · ${prod.festival}` : ""}
+                        {prod.duracao ? ` · ${prod.duracao}` : ""}
                       </p>
                     )}
                     <Link
-                      to={`/trabalhos/${prod.id}`}
+                      to={`/trabalhos/${prod.slug}`}
                       className="inline-flex items-center gap-2 font-semibold border-b-2 border-brand-ink pb-1 hover:border-brand-orange hover:text-brand-orange transition-colors"
                     >
                       Ficha técnica completa
@@ -155,11 +158,11 @@ export default function TrabalhosList() {
             </div>
           )}
 
-          {/* Pagination */}
-          {!loading && (
+          {/* Paginação real da API */}
+          {!loading && lastPage > 1 && (
             <Pagination
               currentPage={currentPage}
-              totalPages={totalPages}
+              totalPages={lastPage}
               onPageChange={handlePageChange}
             />
           )}

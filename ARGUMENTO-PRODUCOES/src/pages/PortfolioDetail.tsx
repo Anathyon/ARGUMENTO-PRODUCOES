@@ -1,8 +1,9 @@
+import { useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowLeft, Award, Calendar, ArrowUpRight } from "lucide-react";
+import { ArrowLeft, Award, Calendar, Film } from "lucide-react";
 import { Layout } from "@/components/Layout";
-import { DATABASE_ITEMS, useFetchData } from "@/data";
+import { useAppStore } from "@/store/useAppStore";
 
 function NotFound() {
   return (
@@ -22,15 +23,15 @@ function NotFound() {
 }
 
 export default function PortfolioDetail() {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { portfolioDetalhe, fetchPortfolioDetalhe } = useAppStore();
 
-  const { data: item, loading } = useFetchData(
-    () => DATABASE_ITEMS.find((p) => p.id === id && p.type === "portfolio") ?? null,
-    [id]
-  );
+  useEffect(() => {
+    if (slug) fetchPortfolioDetalhe(slug);
+  }, [slug, fetchPortfolioDetalhe]);
 
-  if (loading) {
+  if (!portfolioDetalhe && slug) {
     return (
       <Layout>
         <div className="max-w-5xl mx-auto px-6 lg:px-10 py-24 animate-pulse space-y-8">
@@ -42,12 +43,14 @@ export default function PortfolioDetail() {
     );
   }
 
-  if (!item) return <NotFound />;
+  if (!portfolioDetalhe) return <NotFound />;
+
+  const item = portfolioDetalhe;
 
   return (
     <Layout>
       <article>
-        {/* Top Nav */}
+        {/* Navegação topo */}
         <div className="pt-10 pb-6 bg-brand-cream border-b border-brand-ink/10">
           <div className="max-w-7xl mx-auto px-6 lg:px-10">
             <button
@@ -60,43 +63,48 @@ export default function PortfolioDetail() {
           </div>
         </div>
 
-        {/* Hero Image */}
+        {/* Imagem hero */}
         <div className="relative aspect-[16/7] overflow-hidden bg-brand-butter">
-          <img
-            src={item.img}
-            alt={item.title}
-            className="w-full h-full object-cover"
-          />
-          <div
-            className="absolute inset-0"
-            style={{
-              background: `linear-gradient(to right, ${item.color}55 0%, transparent 60%)`,
-            }}
-          />
+          {item.capa?.url ? (
+            <img
+              src={item.capa.url}
+              alt={item.titulo}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Film className="h-24 w-24 text-brand-ink/20" aria-hidden="true" />
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-r from-brand-ink/30 to-transparent" />
         </div>
 
-        {/* Content */}
+        {/* Conteúdo */}
         <div className="bg-brand-cream">
           <div className="max-w-7xl mx-auto px-6 lg:px-10 py-20 grid lg:grid-cols-3 gap-16">
-            {/* Main */}
+            {/* Principal */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7 }}
               className="lg:col-span-2"
             >
-              <div className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-orange mb-4">
-                {item.tag}
-              </div>
+              {item.categoria && (
+                <div className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-orange mb-4">
+                  {item.categoria}
+                </div>
+              )}
               <h1 className="font-display font-black text-5xl md:text-7xl tracking-tight leading-[0.95] mb-8">
-                {item.title}
+                {item.titulo}
               </h1>
 
               <div className="flex flex-wrap gap-6 mb-10 text-sm text-brand-ink/60">
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="h-4 w-4" aria-hidden="true" /> {item.year}
-                </span>
-                {item.festival && item.festival !== "—" && (
+                {item.ano && (
+                  <span className="flex items-center gap-1.5">
+                    <Calendar className="h-4 w-4" aria-hidden="true" /> {item.ano}
+                  </span>
+                )}
+                {item.festival && (
                   <span className="flex items-center gap-1.5">
                     <Award className="h-4 w-4" aria-hidden="true" /> {item.festival}
                   </span>
@@ -104,7 +112,22 @@ export default function PortfolioDetail() {
               </div>
 
               <h2 className="font-display font-black text-2xl mb-4">Sobre o projeto</h2>
-              <p className="text-brand-ink/75 leading-relaxed text-lg">{item.synopsis}</p>
+              <p className="text-brand-ink/75 leading-relaxed text-lg">
+                {item.sinopse ?? item.resumo}
+              </p>
+
+              {item.tags && item.tags.length > 0 && (
+                <div className="mt-8 flex flex-wrap gap-2">
+                  {item.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-3 py-1 rounded-full bg-brand-butter text-xs font-semibold uppercase tracking-wider"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </motion.div>
 
             {/* Sidebar */}
@@ -114,41 +137,25 @@ export default function PortfolioDetail() {
               transition={{ duration: 0.7, delay: 0.15 }}
               className="lg:col-span-1 space-y-10"
             >
-              {/* Credits */}
-              {item.credits && item.credits.length > 0 && (
+              {item.creditos && item.creditos.length > 0 && (
                 <div>
                   <h2 className="font-display font-black text-xl mb-5">Equipe</h2>
                   <ul className="space-y-4">
-                    {item.credits.map((c) => (
-                      <li key={c.role} className="border-b border-brand-ink/10 pb-4">
+                    {item.creditos.map((c) => (
+                      <li key={c.funcao} className="border-b border-brand-ink/10 pb-4">
                         <div className="text-xs font-bold uppercase tracking-widest text-brand-ink/50 mb-1">
-                          {c.role}
+                          {c.funcao}
                         </div>
-                        <div className="font-semibold">{c.name}</div>
+                        <div className="font-semibold">{c.nome}</div>
                       </li>
                     ))}
                   </ul>
                 </div>
               )}
-
-              {/* Related link to Trabalho */}
-              <div className="p-6 rounded-2xl bg-brand-butter">
-                <div className="text-xs font-bold uppercase tracking-widest text-brand-ink/50 mb-3">
-                  Ver produção completa
-                </div>
-                <Link
-                  to={`/trabalhos/${item.id.replace("portfolio-", "")}`}
-                  className="inline-flex items-center gap-2 font-semibold text-brand-ink hover:text-brand-orange transition-colors"
-                >
-                  Ir para Trabalhos
-                  <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-                </Link>
-              </div>
             </motion.div>
           </div>
         </div>
 
-        {/* Footer nav */}
         <div className="bg-brand-cream pb-24">
           <div className="max-w-7xl mx-auto px-6 lg:px-10">
             <Link
