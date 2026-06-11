@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform } from "motion/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Play,
@@ -12,11 +12,12 @@ import {
   Newspaper,
   Sparkles,
   ChevronDown,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
-import logo from "@/assets/logo.png";
+import { z } from "zod";
 import hero from "@/assets/hero.jpg";
 import { Layout } from "@/components/Layout";
-import { Avatar } from "@/components/Avatar";
 import { TEAM_MEMBERS, MARQUEE_ITEMS, INSTITUTION_VALUES } from "@/data";
 import { useAppStore } from "@/store/useAppStore";
 import type { ApiTrabalho } from "@/lib/api";
@@ -344,30 +345,53 @@ function Equipe() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-5 lg:gap-8">
           {TEAM_MEMBERS.map((m, i) => (
             <motion.div
               key={m.id}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.06 }}
-              className="group flex flex-col items-center text-center p-6 rounded-2xl bg-brand-cream hover:bg-brand-ink hover:text-brand-cream transition-all duration-500 cursor-default"
+              transition={{ duration: 0.6, delay: i * 0.08 }}
+              className="group relative rounded-2xl overflow-hidden bg-brand-ink cursor-default shadow-lg"
             >
-              {/* Avatar */}
-              <div className="h-20 w-20 rounded-full overflow-hidden ring-4 ring-brand-butter group-hover:ring-brand-orange transition-all mb-5 flex-shrink-0">
-                <Avatar name={m.name} seed={m.avatarSeed} />
+              {/* Foto */}
+              <div className="aspect-[3/4] overflow-hidden">
+                {m.photo ? (
+                  <img
+                    src={m.photo}
+                    alt={m.name}
+                    loading="lazy"
+                    className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                  />
+                ) : (
+                  // Fallback com gradiente + iniciais quando não há foto
+                  <div className="w-full h-full bg-gradient-to-br from-brand-orange to-brand-ember flex items-center justify-center">
+                    <span className="font-display font-black text-5xl text-brand-cream">
+                      {m.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
+                    </span>
+                  </div>
+                )}
+                {/* Gradiente de baixo para cima sobre a foto */}
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-ink via-brand-ink/40 to-transparent" />
               </div>
-              {/* Info */}
-              <div className="text-xs font-bold uppercase tracking-[0.25em] text-brand-orange mb-1">
-                {m.role}
+
+              {/* Nome e cargo sobrepostos na parte inferior */}
+              <div className="absolute bottom-0 inset-x-0 p-5">
+                <div className="font-display font-black text-lg leading-tight text-brand-cream mb-1">
+                  {m.name}
+                </div>
+                <div className="text-xs font-bold uppercase tracking-[0.2em] text-brand-orange">
+                  {m.role}
+                </div>
               </div>
-              <div className="font-display text-xl font-black leading-tight">
-                {m.name}
+
+              {/* Bio aparece no hover */}
+              <div className="absolute inset-0 bg-brand-ink/90 flex flex-col justify-center items-center text-center px-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="font-display font-black text-xl text-brand-cream mb-2">{m.name}</div>
+                <div className="text-xs font-bold uppercase tracking-[0.2em] text-brand-orange mb-4">{m.role}</div>
+                <p className="text-sm text-brand-cream/75 leading-relaxed">{m.bio}</p>
               </div>
-              <p className="mt-3 text-sm opacity-60 leading-relaxed line-clamp-2">
-                {m.bio}
-              </p>
             </motion.div>
           ))}
         </div>
@@ -608,6 +632,131 @@ function Noticias() {
 /* Contato                                                              */
 /* ------------------------------------------------------------------ */
 
+// Schema Zod para o formulário de contato
+const contatoSchema = z.object({
+  nome:     z.string().min(2, "Nome deve ter ao menos 2 caracteres."),
+  email:    z.string().email("E-mail inválido."),
+  assunto:  z.string().min(3, "Informe o assunto."),
+  mensagem: z.string().min(10, "Mensagem deve ter ao menos 10 caracteres."),
+});
+
+type ContatoForm = z.infer<typeof contatoSchema>;
+type FormStatus = "idle" | "success" | "error";
+
+function ContatoFormulario() {
+  const [fields, setFields] = useState<ContatoForm>({ nome: "", email: "", assunto: "", mensagem: "" });
+  const [errors, setErrors] = useState<Partial<Record<keyof ContatoForm, string>>>({});
+  const [status, setStatus] = useState<FormStatus>("idle");
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+    const { name, value } = e.target;
+    setFields((prev) => ({ ...prev, [name]: value }));
+    // Limpa o erro do campo ao editar
+    setErrors((prev) => ({ ...prev, [name]: undefined }));
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const result = contatoSchema.safeParse(fields);
+    if (!result.success) {
+      const fieldErrors: typeof errors = {};
+      result.error.errors.forEach((err) => {
+        const key = err.path[0] as keyof ContatoForm;
+        if (!fieldErrors[key]) fieldErrors[key] = err.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+    // Simula envio — substituir por chamada real à API quando disponível
+    setStatus("success");
+    setFields({ nome: "", email: "", assunto: "", mensagem: "" });
+  }
+
+  if (status === "success") {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
+        <CheckCircle className="h-14 w-14 text-brand-orange" aria-hidden="true" />
+        <h3 className="font-display font-black text-2xl">Mensagem enviada!</h3>
+        <p className="text-brand-ink/65 max-w-xs">Em breve entraremos em contato. Obrigado pelo interesse!</p>
+        <button
+          onClick={() => setStatus("idle")}
+          className="mt-4 text-sm font-semibold underline underline-offset-4 hover:text-brand-orange transition-colors"
+        >
+          Enviar outra mensagem
+        </button>
+      </div>
+    );
+  }
+
+  const inputClass = (field: keyof ContatoForm) =>
+    `w-full rounded-xl border px-4 py-3 text-sm bg-brand-cream text-brand-ink placeholder:text-brand-ink/40 outline-none transition-colors focus:border-brand-orange ${
+      errors[field] ? "border-red-400" : "border-brand-ink/20"
+    }`;
+
+  return (
+    <form onSubmit={handleSubmit} noValidate className="space-y-4" aria-label="Formulário de contato">
+      {status === "error" && (
+        <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 text-red-600 text-sm">
+          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          Não foi possível enviar. Tente novamente.
+        </div>
+      )}
+
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <input
+            name="nome" value={fields.nome} onChange={handleChange}
+            placeholder="Seu nome" className={inputClass("nome")}
+            aria-label="Nome" aria-describedby={errors.nome ? "err-nome" : undefined}
+          />
+          {errors.nome && <p id="err-nome" className="mt-1 text-xs text-red-500">{errors.nome}</p>}
+        </div>
+        <div>
+          <input
+            name="email" type="email" value={fields.email} onChange={handleChange}
+            placeholder="Seu e-mail" className={inputClass("email")}
+            aria-label="E-mail" aria-describedby={errors.email ? "err-email" : undefined}
+          />
+          {errors.email && <p id="err-email" className="mt-1 text-xs text-red-500">{errors.email}</p>}
+        </div>
+      </div>
+
+      <div>
+        <select
+          name="assunto" value={fields.assunto} onChange={handleChange}
+          className={inputClass("assunto")}
+          aria-label="Assunto"
+        >
+          <option value="">Assunto</option>
+          <option value="Parceria">Parceria</option>
+          <option value="Projeto">Projeto</option>
+          <option value="Imprensa">Imprensa</option>
+          <option value="Festival">Festival</option>
+          <option value="Outro">Outro</option>
+        </select>
+        {errors.assunto && <p className="mt-1 text-xs text-red-500">{errors.assunto}</p>}
+      </div>
+
+      <div>
+        <textarea
+          name="mensagem" value={fields.mensagem} onChange={handleChange}
+          placeholder="Sua mensagem..." rows={5}
+          className={`${inputClass("mensagem")} resize-none`}
+          aria-label="Mensagem"
+        />
+        {errors.mensagem && <p className="mt-1 text-xs text-red-500">{errors.mensagem}</p>}
+      </div>
+
+      <button
+        type="submit"
+        className="w-full rounded-xl bg-brand-ink text-brand-cream font-semibold py-3.5 hover:bg-brand-orange transition-colors"
+      >
+        Enviar mensagem
+      </button>
+    </form>
+  );
+}
+
 function Contato() {
   return (
     <section
@@ -616,7 +765,9 @@ function Contato() {
       aria-label="Contato"
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-16 items-start">
+
+          {/* Lado esquerdo: info + redes */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -632,7 +783,7 @@ function Contato() {
               Parcerias, projetos, festivais ou imprensa — escreva pra gente. Adoramos histórias novas.
             </p>
 
-            <div className="mt-12 space-y-4">
+            <div className="mt-10 space-y-4">
               <a
                 href="mailto:contato@argumentoproducoes.com.br"
                 className="group flex items-center justify-between p-5 rounded-2xl bg-brand-butter hover:bg-brand-ink hover:text-brand-butter transition-colors"
@@ -643,7 +794,6 @@ function Contato() {
                 </div>
                 <ArrowUpRight className="h-5 w-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" aria-hidden="true" />
               </a>
-
               <div className="grid grid-cols-2 gap-4">
                 <a
                   href="#"
@@ -671,35 +821,18 @@ function Contato() {
             </div>
           </motion.div>
 
+          {/* Lado direito: formulário */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.9 }}
-            className="relative"
+            transition={{ duration: 0.8, delay: 0.15 }}
+            className="bg-brand-butter rounded-3xl p-8 lg:p-10"
           >
-            <div className="aspect-square rounded-[3rem] bg-gradient-to-br from-brand-orange via-brand-ember to-brand-ink p-1 glow-orange">
-              <div className="w-full h-full rounded-[2.85rem] bg-brand-ink p-10 flex flex-col justify-between relative overflow-hidden">
-                <div className="absolute inset-0 bg-grain opacity-30" aria-hidden="true" />
-                <div className="relative">
-                  <img src={logo} alt="" role="presentation" className="h-14 w-14 mb-6" />
-                  <div className="font-display text-3xl font-black text-brand-cream leading-tight">
-                    Argumento <br />
-                    <span className="text-gradient-warm italic">Produções</span>
-                  </div>
-                </div>
-                <div className="relative space-y-6">
-                  <p className="text-brand-cream/70 text-sm leading-relaxed">
-                    Estúdio de animação e produção audiovisual. Empresa parceira da Narrativa Entretenimento.
-                  </p>
-                  <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-brand-butter">
-                    <span className="h-2 w-2 rounded-full bg-brand-orange animate-pulse" aria-hidden="true" />
-                    Aceitando novos projetos · 2026
-                  </div>
-                </div>
-              </div>
-            </div>
+            <h3 className="font-display font-black text-2xl mb-6">Mande uma mensagem</h3>
+            <ContatoFormulario />
           </motion.div>
+
         </div>
       </div>
     </section>
