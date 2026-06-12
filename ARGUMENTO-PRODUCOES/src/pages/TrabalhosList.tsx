@@ -13,7 +13,7 @@ function LoadingSkeleton() {
     <div className="space-y-8">
       {[1, 2].map((i) => (
         <div key={i} className="grid lg:grid-cols-12 gap-8 animate-pulse">
-          <div className="lg:col-span-6 aspect-[4/3] rounded-3xl bg-brand-ink/10" />
+          <div className="lg:col-span-6 aspect-4/3 rounded-3xl bg-brand-ink/10" />
           <div className="lg:col-span-6 flex flex-col justify-center gap-4">
             <div className="h-3 w-24 rounded-full bg-brand-ink/10" />
             <div className="h-10 w-3/4 rounded-xl bg-brand-ink/10" />
@@ -96,7 +96,7 @@ export default function TrabalhosList() {
                 >
                   {/* Thumbnail */}
                   <div className="lg:col-span-7 relative group">
-                    <div className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-brand-butter">
+                    <div className="relative aspect-4/3 rounded-3xl overflow-hidden bg-brand-butter">
                       {prod.capa?.url ? (
                         <img
                           src={prod.capa.url}
@@ -109,7 +109,7 @@ export default function TrabalhosList() {
                           <Film className="h-16 w-16 text-brand-ink/20" aria-hidden="true" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-brand-ink/60 via-transparent" />
+                      <div className="absolute inset-0 bg-linear-to-t from-brand-ink/60 via-transparent" />
                       <Link
                         to={`/trabalhos/${prod.slug}`}
                         className="absolute inset-0 grid place-items-center"

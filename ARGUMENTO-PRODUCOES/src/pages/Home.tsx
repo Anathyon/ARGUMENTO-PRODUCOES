@@ -70,8 +70,8 @@ function Hero() {
     >
       <motion.div style={{ scale, y }} className="absolute inset-0 will-change-transform">
         <img src={hero} alt="" role="presentation" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-butter/30 via-brand-cream/40 to-brand-cream" />
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-cream via-brand-cream/40 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-b from-brand-butter/30 via-brand-cream/40 to-brand-cream" />
+        <div className="absolute inset-0 bg-linear-to-r from-brand-cream via-brand-cream/40 to-transparent" />
       </motion.div>
 
       <motion.div
@@ -213,7 +213,7 @@ function TrabalhoRow({ prod, index }: { prod: ApiTrabalho; index: number; curren
       <div className="lg:col-span-7 relative group">
         <motion.div
           style={{ y }}
-          className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-brand-butter will-change-transform"
+          className="relative aspect-4/3 rounded-3xl overflow-hidden bg-brand-butter will-change-transform"
         >
           {prod.capa?.url ? (
             <img
@@ -227,7 +227,7 @@ function TrabalhoRow({ prod, index }: { prod: ApiTrabalho; index: number; curren
               <Film className="h-16 w-16 text-brand-ink/20" aria-hidden="true" />
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-brand-ink/60 via-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-brand-ink/60 via-transparent" />
           {prod.trailer_url && (
             <a
               href={prod.trailer_url}
@@ -288,7 +288,7 @@ function Trabalhos() {
           <div className="mt-20 space-y-16">
             {[1, 2].map((i) => (
               <div key={i} className="grid lg:grid-cols-12 gap-8 animate-pulse">
-                <div className="lg:col-span-7 aspect-[4/3] rounded-3xl bg-brand-ink/10" />
+                <div className="lg:col-span-7 aspect-4/3 rounded-3xl bg-brand-ink/10" />
                 <div className="lg:col-span-5 flex flex-col justify-center gap-4">
                   <div className="h-3 w-24 rounded-full bg-brand-ink/10" />
                   <div className="h-10 w-3/4 rounded-xl bg-brand-ink/10" />
@@ -356,7 +356,7 @@ function Equipe() {
               className="group relative rounded-2xl overflow-hidden bg-brand-ink cursor-default shadow-lg"
             >
               {/* Foto */}
-              <div className="aspect-[3/4] overflow-hidden">
+              <div className="aspect-3/4 overflow-hidden">
                 {m.photo ? (
                   <img
                     src={m.photo}
@@ -366,14 +366,14 @@ function Equipe() {
                   />
                 ) : (
                   // Fallback com gradiente + iniciais quando não há foto
-                  <div className="w-full h-full bg-gradient-to-br from-brand-orange to-brand-ember flex items-center justify-center">
+                  <div className="w-full h-full bg-linear-to-br from-brand-orange to-brand-ember flex items-center justify-center">
                     <span className="font-display font-black text-5xl text-brand-cream">
                       {m.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
                     </span>
                   </div>
                 )}
                 {/* Gradiente de baixo para cima sobre a foto */}
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-ink via-brand-ink/40 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-brand-ink via-brand-ink/40 to-transparent" />
               </div>
 
               {/* Nome e cargo sobrepostos na parte inferior */}
@@ -523,7 +523,7 @@ function Institucional() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: i * 0.1 }}
-              className="relative p-8 rounded-3xl bg-brand-cream/[0.04] border border-brand-cream/10 backdrop-blur hover:bg-brand-cream/[0.07] transition-colors"
+              className="relative p-8 rounded-3xl bg-brand-cream/4 border border-brand-cream/10 backdrop-blur hover:bg-brand-cream/7 transition-colors"
             >
               <div className="font-mono text-xs text-brand-orange mb-6" aria-hidden="true">/ 0{i + 1}</div>
               <h3 className="font-display text-3xl font-black mb-4">{v.title}</h3>
@@ -697,7 +697,7 @@ function ContatoFormulario() {
     <form onSubmit={handleSubmit} noValidate className="space-y-4" aria-label="Formulário de contato">
       {status === "error" && (
         <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 text-red-600 text-sm">
-          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          <AlertCircle className="h-4 w-4 shrink-0" />
           Não foi possível enviar. Tente novamente.
         </div>
       )}

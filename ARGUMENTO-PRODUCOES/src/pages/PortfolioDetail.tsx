@@ -36,7 +36,7 @@ export default function PortfolioDetail() {
       <Layout>
         <div className="max-w-5xl mx-auto px-6 lg:px-10 py-24 animate-pulse space-y-8">
           <div className="h-5 w-24 bg-brand-ink/10 rounded" />
-          <div className="aspect-[16/7] rounded-3xl bg-brand-ink/10 w-full" />
+          <div className="aspect-16/7 rounded-3xl bg-brand-ink/10 w-full" />
           <div className="h-12 w-2/3 bg-brand-ink/10 rounded-xl" />
         </div>
       </Layout>
@@ -64,7 +64,7 @@ export default function PortfolioDetail() {
         </div>
 
         {/* Imagem hero */}
-        <div className="relative aspect-[16/7] overflow-hidden bg-brand-butter">
+        <div className="relative aspect-16/7 overflow-hidden bg-brand-butter">
           {item.capa?.url ? (
             <img
               src={item.capa.url}
@@ -76,7 +76,7 @@ export default function PortfolioDetail() {
               <Film className="h-24 w-24 text-brand-ink/20" aria-hidden="true" />
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-ink/30 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-r from-brand-ink/30 to-transparent" />
         </div>
 
         {/* Conteúdo */}

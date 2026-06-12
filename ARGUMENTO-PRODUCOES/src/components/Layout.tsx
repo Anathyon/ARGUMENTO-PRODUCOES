@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowUpRight, ChevronDown } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 export const NAV_ITEMS = [
@@ -181,7 +181,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       </motion.header>
 
       {/* Main Content Area */}
-      <main className="flex-grow pt-20">
+      <main className="grow pt-20">
         {children}
       </main>
 

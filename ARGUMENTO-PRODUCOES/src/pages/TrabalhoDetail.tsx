@@ -62,7 +62,7 @@ export default function TrabalhoDetail() {
           ) : (
             <div className="w-full h-full bg-brand-ink" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-brand-ink via-brand-ink/40 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-brand-ink via-brand-ink/40 to-transparent" />
 
           {/* Botão de trailer (abre URL se disponível) */}
           <div className="absolute inset-0 flex items-center justify-center">

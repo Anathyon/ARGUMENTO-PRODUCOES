@@ -117,7 +117,7 @@ export default function NoticiaDetail() {
         {/* Imagem de capa */}
         {item.capa?.url && (
           <div className="max-w-7xl mx-auto px-6 lg:px-10 -mt-10">
-            <div className="aspect-[16/7] rounded-3xl overflow-hidden">
+            <div className="aspect-16/7 rounded-3xl overflow-hidden">
               <img
                 src={item.capa.url}
                 alt={item.titulo}
@@ -165,7 +165,7 @@ export default function NoticiaDetail() {
 
               {/* Autor */}
               <div className="mt-16 p-6 rounded-2xl bg-brand-butter flex items-center gap-5">
-                <div className="h-14 w-14 rounded-full bg-brand-ink grid place-items-center font-display font-black text-brand-cream text-lg flex-shrink-0">
+                <div className="h-14 w-14 rounded-full bg-brand-ink grid place-items-center font-display font-black text-brand-cream text-lg shrink-0">
                   {item.autor.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
                 </div>
                 <div>
