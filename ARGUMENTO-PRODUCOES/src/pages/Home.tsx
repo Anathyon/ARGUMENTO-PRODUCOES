@@ -14,13 +14,17 @@ import {
   ChevronDown,
   CheckCircle,
   AlertCircle,
+  Map,
+  ExternalLink,
+  Loader2,
 } from "lucide-react";
 import { z } from "zod";
 import hero from "@/assets/hero.jpg";
 import { Layout } from "@/components/Layout";
-import { TEAM_MEMBERS, MARQUEE_ITEMS, INSTITUTION_VALUES } from "@/data";
+import { TEAM_MEMBERS, MARQUEE_ITEMS, INSTITUTION_VALUES, type TeamMember } from "@/data";
 import { useAppStore } from "@/store/useAppStore";
 import type { ApiTrabalho } from "@/lib/api";
+import { CollaboratorModal } from "@/components/CollaboratorModal";
 
 /* ------------------------------------------------------------------ */
 /* Root                                                                 */
@@ -29,6 +33,7 @@ import type { ApiTrabalho } from "@/lib/api";
 export default function HomePage() {
   // Carrega dados ao entrar na home
   const { fetchTrabalhos, fetchNoticias, fetchPortfolio } = useAppStore();
+  const [selectedCollaborator, setSelectedCollaborator] = useState<TeamMember | null>(null);
 
   useEffect(() => {
     fetchTrabalhos(1);
@@ -41,11 +46,18 @@ export default function HomePage() {
       <Hero />
       <Marquee />
       <Trabalhos />
-      <Equipe />
+      <Equipe onSelectMember={setSelectedCollaborator} />
       <Portfolio />
       <Institucional />
       <Noticias />
       <Contato />
+
+      {selectedCollaborator && (
+        <CollaboratorModal
+          collaborator={selectedCollaborator}
+          onClose={() => setSelectedCollaborator(null)}
+        />
+      )}
     </Layout>
   );
 }
@@ -328,7 +340,7 @@ function Trabalhos() {
 /* Equipe                                                               */
 /* ------------------------------------------------------------------ */
 
-function Equipe() {
+function Equipe({ onSelectMember }: { onSelectMember: (member: TeamMember) => void }) {
   return (
     <section id="equipe" className="relative py-28 lg:py-40 bg-brand-butter bg-grain" aria-label="Equipe">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
@@ -353,7 +365,8 @@ function Equipe() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: i * 0.08 }}
-              className="group relative rounded-2xl overflow-hidden bg-brand-ink cursor-default shadow-lg"
+              onClick={() => onSelectMember(m)}
+              className="group relative rounded-2xl overflow-hidden bg-brand-ink cursor-pointer shadow-lg active:scale-[0.98] transition-transform duration-200"
             >
               {/* Foto */}
               <div className="aspect-3/4 overflow-hidden">
@@ -381,7 +394,7 @@ function Equipe() {
                 <div className="font-display font-black text-lg leading-tight text-brand-cream mb-1">
                   {m.name}
                 </div>
-                <div className="text-xs font-bold uppercase tracking-[0.2em] text-brand-orange">
+                <div className="text-xs font-bold uppercase tracking-[0.25em] text-brand-orange">
                   {m.role}
                 </div>
               </div>
@@ -389,8 +402,27 @@ function Equipe() {
               {/* Bio aparece no hover */}
               <div className="absolute inset-0 bg-brand-ink/90 flex flex-col justify-center items-center text-center px-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <div className="font-display font-black text-xl text-brand-cream mb-2">{m.name}</div>
-                <div className="text-xs font-bold uppercase tracking-[0.2em] text-brand-orange mb-4">{m.role}</div>
-                <p className="text-sm text-brand-cream/75 leading-relaxed">{m.bio}</p>
+                <div className="text-xs font-bold uppercase tracking-[0.2em] text-brand-orange mb-6">{m.role}</div>
+                <div className="flex flex-col items-center gap-3 w-full">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-brand-orange text-brand-cream text-xs font-semibold px-4 py-2 shadow-md">
+                    Ver portfólio
+                    <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                  </span>
+                  {m.mapaLink && (
+                    <a
+                      href={m.mapaLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-brand-cream/10 border border-brand-cream/20 text-brand-cream/80 hover:bg-brand-cream/20 hover:text-brand-cream text-[11px] font-semibold px-3 py-1.5 transition-colors"
+                      aria-label={`Ver ${m.name} no Mapa Cultural`}
+                    >
+                      <Map className="h-3 w-3" aria-hidden="true" />
+                      Mapa Cultural
+                      <ExternalLink className="h-2.5 w-2.5" aria-hidden="true" />
+                    </a>
+                  )}
+                </div>
               </div>
             </motion.div>
           ))}
@@ -632,6 +664,9 @@ function Noticias() {
 /* Contato                                                              */
 /* ------------------------------------------------------------------ */
 
+// Chave pública da Web3Forms — pode ficar no client-side
+const WEB3FORMS_KEY = "b27b0cc3-07b2-4835-aa40-fe78df5a1d9f";
+
 // Schema Zod para o formulário de contato
 const contatoSchema = z.object({
   nome:     z.string().min(2, "Nome deve ter ao menos 2 caracteres."),
@@ -641,12 +676,13 @@ const contatoSchema = z.object({
 });
 
 type ContatoForm = z.infer<typeof contatoSchema>;
-type FormStatus = "idle" | "success" | "error";
+type FormStatus = "idle" | "loading" | "success" | "error";
 
 function ContatoFormulario() {
   const [fields, setFields] = useState<ContatoForm>({ nome: "", email: "", assunto: "", mensagem: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof ContatoForm, string>>>({});
   const [status, setStatus] = useState<FormStatus>("idle");
+  const [apiError, setApiError] = useState<string | null>(null);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value } = e.target;
@@ -655,8 +691,11 @@ function ContatoFormulario() {
     setErrors((prev) => ({ ...prev, [name]: undefined }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setApiError(null);
+
+    // Validação client-side com Zod
     const result = contatoSchema.safeParse(fields);
     if (!result.success) {
       const fieldErrors: typeof errors = {};
@@ -667,9 +706,38 @@ function ContatoFormulario() {
       setErrors(fieldErrors);
       return;
     }
-    // Simula envio — substituir por chamada real à API quando disponível
-    setStatus("success");
-    setFields({ nome: "", email: "", assunto: "", mensagem: "" });
+
+    setStatus("loading");
+
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_KEY,
+          name: fields.nome,
+          email: fields.email,
+          subject: `[Argumento Produções] ${fields.assunto} — ${fields.nome}`,
+          message: fields.mensagem,
+          // Campos extras enviados como contexto no e-mail
+          assunto: fields.assunto,
+          from_name: "Site Argumento Produções",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setStatus("success");
+        setFields({ nome: "", email: "", assunto: "", mensagem: "" });
+      } else {
+        setApiError(data.message ?? "Erro ao enviar. Tente novamente.");
+        setStatus("error");
+      }
+    } catch {
+      setApiError("Sem conexão. Verifique sua internet e tente novamente.");
+      setStatus("error");
+    }
   }
 
   if (status === "success") {
@@ -688,17 +756,19 @@ function ContatoFormulario() {
     );
   }
 
+  const isLoading = status === "loading";
+
   const inputClass = (field: keyof ContatoForm) =>
-    `w-full rounded-xl border px-4 py-3 text-sm bg-brand-cream text-brand-ink placeholder:text-brand-ink/40 outline-none transition-colors focus:border-brand-orange ${
+    `w-full rounded-xl border px-4 py-3 text-sm bg-brand-cream text-brand-ink placeholder:text-brand-ink/40 outline-none transition-colors focus:border-brand-orange disabled:opacity-50 ${
       errors[field] ? "border-red-400" : "border-brand-ink/20"
     }`;
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4" aria-label="Formulário de contato">
       {status === "error" && (
-        <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 text-red-600 text-sm">
-          <AlertCircle className="h-4 w-4 shrink-0" />
-          Não foi possível enviar. Tente novamente.
+        <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 text-red-600 text-sm" role="alert">
+          <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+          {apiError ?? "Não foi possível enviar. Tente novamente."}
         </div>
       )}
 
@@ -708,6 +778,7 @@ function ContatoFormulario() {
             name="nome" value={fields.nome} onChange={handleChange}
             placeholder="Seu nome" className={inputClass("nome")}
             aria-label="Nome" aria-describedby={errors.nome ? "err-nome" : undefined}
+            disabled={isLoading}
           />
           {errors.nome && <p id="err-nome" className="mt-1 text-xs text-red-500">{errors.nome}</p>}
         </div>
@@ -716,6 +787,7 @@ function ContatoFormulario() {
             name="email" type="email" value={fields.email} onChange={handleChange}
             placeholder="Seu e-mail" className={inputClass("email")}
             aria-label="E-mail" aria-describedby={errors.email ? "err-email" : undefined}
+            disabled={isLoading}
           />
           {errors.email && <p id="err-email" className="mt-1 text-xs text-red-500">{errors.email}</p>}
         </div>
@@ -726,6 +798,7 @@ function ContatoFormulario() {
           name="assunto" value={fields.assunto} onChange={handleChange}
           className={inputClass("assunto")}
           aria-label="Assunto"
+          disabled={isLoading}
         >
           <option value="">Assunto</option>
           <option value="Parceria">Parceria</option>
@@ -743,15 +816,24 @@ function ContatoFormulario() {
           placeholder="Sua mensagem..." rows={5}
           className={`${inputClass("mensagem")} resize-none`}
           aria-label="Mensagem"
+          disabled={isLoading}
         />
         {errors.mensagem && <p className="mt-1 text-xs text-red-500">{errors.mensagem}</p>}
       </div>
 
       <button
         type="submit"
-        className="w-full rounded-xl bg-brand-ink text-brand-cream font-semibold py-3.5 hover:bg-brand-orange transition-colors"
+        disabled={isLoading}
+        className="w-full rounded-xl bg-brand-ink text-brand-cream font-semibold py-3.5 hover:bg-brand-orange transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
-        Enviar mensagem
+        {isLoading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            Enviando...
+          </>
+        ) : (
+          "Enviar mensagem"
+        )}
       </button>
     </form>
   );
@@ -817,6 +899,42 @@ function Contato() {
                   </div>
                   <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
                 </a>
+              </div>
+
+              {/* Links gerais do Mapa Cultural */}
+              <div className="p-5 rounded-2xl border border-brand-ink/15 bg-brand-ink/3">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-brand-ink/50 mb-3">
+                  <Map className="h-3.5 w-3.5" aria-hidden="true" />
+                  Mapa Cultural do Ceará
+                </div>
+                <div className="flex flex-col gap-2.5">
+                  <a
+                    href="https://mapacultural.secult.ce.gov.br/agente/178753/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center justify-between text-sm font-semibold text-brand-ink/75 hover:text-brand-orange transition-colors"
+                    aria-label="Argumento Produções no Mapa Cultural (agente 178753)"
+                  >
+                    <span className="flex items-center gap-2">
+                      <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                      mapacultural.secult.ce.gov.br/agente/178753
+                    </span>
+                    <ArrowUpRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" aria-hidden="true" />
+                  </a>
+                  <a
+                    href="https://mapacultural.secult.ce.gov.br/agente/8224/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center justify-between text-sm font-semibold text-brand-ink/75 hover:text-brand-orange transition-colors"
+                    aria-label="Argumento Produções no Mapa Cultural (agente 8224)"
+                  >
+                    <span className="flex items-center gap-2">
+                      <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                      mapacultural.secult.ce.gov.br/agente/8224
+                    </span>
+                    <ArrowUpRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" aria-hidden="true" />
+                  </a>
+                </div>
               </div>
             </div>
           </motion.div>

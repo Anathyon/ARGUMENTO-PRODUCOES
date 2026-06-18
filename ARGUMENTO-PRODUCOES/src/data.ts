@@ -9,57 +9,110 @@ export interface TeamMember {
   avatarSeed: string;
   bio: string;
   photo?: string;
+  slides?: string[];
+  /** Link do perfil no Mapa Cultural do Ceará */
+  mapaLink?: string;
 }
 
 export const TEAM_MEMBERS: TeamMember[] = [
   {
-    id: "mariana-souza",
-    name: "Mariana Souza",
-    role: "Direção",
-    avatarSeed: "mariana",
-    bio: "Diretora e animadora dedicada a explorar a poética visual do cotidiano nordestino.",
-    photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=560&fit=crop&crop=face",
+    id: "maria-eduarda",
+    name: "Maria Eduarda",
+    role: "Colaboradora",
+    avatarSeed: "mariaeduarda",
+    bio: "Veja o portfólio completo no slideshow.",
+    photo: "/Cards/Maria Eduarda/Eduarda.jpg",
+    slides: [
+      "/Cards/Maria Eduarda/Captura de tela de 2026-06-18 14-22-02.png",
+      "/Cards/Maria Eduarda/Captura de tela de 2026-06-18 14-22-19.png",
+      "/Cards/Maria Eduarda/Captura de tela de 2026-06-18 14-22-45.png",
+      "/Cards/Maria Eduarda/Captura de tela de 2026-06-18 14-23-29.png",
+      "/Cards/Maria Eduarda/Captura de tela de 2026-06-18 14-23-49.png"
+    ]
   },
   {
-    id: "lucas-rocha",
-    name: "Lucas Rocha",
-    role: "Roteiro",
-    avatarSeed: "lucas",
-    bio: "Roteirista apaixonado pelas tradições orais sertanejas e contos clássicos.",
-    photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=560&fit=crop&crop=face",
+    id: "gabriely-soares",
+    name: "Gabriely Soares",
+    role: "Colaboradora",
+    avatarSeed: "gabrielysoares",
+    bio: "Veja o portfólio completo no slideshow.",
+    photo: "/Cards/Gabriely Soares/Gabriely.jpg",
+    slides: [
+      "/Cards/Gabriely Soares/Captura de tela de 2026-06-18 14-24-17.png",
+      "/Cards/Gabriely Soares/Captura de tela de 2026-06-18 14-24-30.png",
+      "/Cards/Gabriely Soares/Captura de tela de 2026-06-18 14-25-03.png",
+      "/Cards/Gabriely Soares/Captura de tela de 2026-06-18 14-25-23.png",
+      "/Cards/Gabriely Soares/Captura de tela de 2026-06-18 14-25-34.png"
+    ]
   },
   {
-    id: "sofia-mendes",
-    name: "Sofia Mendes",
-    role: "Arte e Design",
-    avatarSeed: "sofia",
-    bio: "Ilustradora e diretora de arte. Constrói os universos gráficos das produções.",
-    photo: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=560&fit=crop&crop=face",
+    id: "naiana-sousa",
+    name: "Naiana Sousa",
+    role: "Colaboradora",
+    avatarSeed: "naianasousa",
+    bio: "Veja o portfólio completo no slideshow.",
+    photo: "/Cards/Naiana Sousa/Naiana.jpg",
+    mapaLink: "https://mapacultural.secult.ce.gov.br/agente/7911/",
+    slides: [
+      "/Cards/Naiana Sousa/Captura de tela de 2026-06-18 14-26-03.png",
+      "/Cards/Naiana Sousa/Captura de tela de 2026-06-18 14-26-18.png",
+      "/Cards/Naiana Sousa/Captura de tela de 2026-06-18 14-26-27.png",
+      "/Cards/Naiana Sousa/Captura de tela de 2026-06-18 14-26-34.png",
+      "/Cards/Naiana Sousa/Captura de tela de 2026-06-18 14-27-01.png",
+      "/Cards/Naiana Sousa/Captura de tela de 2026-06-18 14-27-21.png",
+      "/Cards/Naiana Sousa/Captura de tela de 2026-06-18 14-27-49.png",
+      "/Cards/Naiana Sousa/Captura de tela de 2026-06-18 14-28-03.png"
+    ]
   },
   {
-    id: "matheus-silva",
-    name: "Matheus Silva",
-    role: "Animação 2D",
-    avatarSeed: "matheus",
-    bio: "Animador especializado em quadros fluidos e expressivos desenhados à mão.",
-    photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=560&fit=crop&crop=face",
+    id: "luciana-tomaz",
+    name: "Luciana Tomaz",
+    role: "Colaboradora",
+    avatarSeed: "lucianatomaz",
+    bio: "Veja o portfólio completo no slideshow.",
+    photo: "/Cards/Luciana Tomaz/Luciana.jpg",
+    mapaLink: "https://mapacultural.secult.ce.gov.br/agente/148356/",
+    slides: [
+      "/Cards/Luciana Tomaz/Captura de tela de 2026-06-18 14-31-07.png",
+      "/Cards/Luciana Tomaz/Captura de tela de 2026-06-18 14-32-09.png",
+      "/Cards/Luciana Tomaz/Captura de tela de 2026-06-18 14-32-21.png",
+      "/Cards/Luciana Tomaz/Captura de tela de 2026-06-18 14-32-39.png",
+      "/Cards/Luciana Tomaz/Captura de tela de 2026-06-18 14-32-52.png"
+    ]
   },
   {
-    id: "beatriz-santos",
-    name: "Beatriz Santos",
-    role: "Produção",
-    avatarSeed: "beatriz",
-    bio: "Produtora executiva focada em viabilizar projetos independentes com eficiência.",
-    photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=560&fit=crop&crop=face",
+    id: "emily-bernardo",
+    name: "Emily Bernardo",
+    role: "Colaboradora",
+    avatarSeed: "emilybernardo",
+    bio: "Veja o portfólio completo no slideshow.",
+    photo: "/Cards/Emily Bernardo/Emily.jpg",
+    mapaLink: "https://mapacultural.secult.ce.gov.br/agente/148335/",
+    slides: [
+      "/Cards/Emily Bernardo/Captura de tela de 2026-06-18 14-33-21.png",
+      "/Cards/Emily Bernardo/Captura de tela de 2026-06-18 14-33-33.png",
+      "/Cards/Emily Bernardo/Captura de tela de 2026-06-18 14-33-43.png",
+      "/Cards/Emily Bernardo/Captura de tela de 2026-06-18 14-34-03.png",
+      "/Cards/Emily Bernardo/Captura de tela de 2026-06-18 14-34-13.png",
+      "/Cards/Emily Bernardo/Captura de tela de 2026-06-18 14-34-26.png",
+      "/Cards/Emily Bernardo/Captura de tela de 2026-06-18 14-34-40.png",
+      "/Cards/Emily Bernardo/Captura de tela de 2026-06-18 14-34-57.png",
+      "/Cards/Emily Bernardo/Captura de tela de 2026-06-18 14-35-13.png"
+    ]
   },
   {
-    id: "thiago-costa",
-    name: "Thiago Costa",
-    role: "Trilha e Som",
-    avatarSeed: "thiago",
-    bio: "Compositor e sound designer. Mescla instrumentos regionais com texturas digitais.",
-    photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=560&fit=crop&crop=face",
-  },
+    id: "hellen-sarafim",
+    name: "Hellen Sarafim",
+    role: "Colaboradora",
+    avatarSeed: "hellensarafim",
+    bio: "Veja o portfólio completo no slideshow.",
+    photo: "/Cards/Hellen Sarafim/Hellen.jpg",
+    slides: [
+      "/Cards/Hellen Sarafim/Captura de tela de 2026-06-18 14-35-34.png",
+      "/Cards/Hellen Sarafim/Captura de tela de 2026-06-18 14-35-45.png",
+      "/Cards/Hellen Sarafim/Captura de tela de 2026-06-18 14-35-55.png"
+    ]
+  }
 ];
 
 export const INSTITUTION_VALUES = [
