@@ -664,8 +664,8 @@ function Noticias() {
 /* Contato                                                              */
 /* ------------------------------------------------------------------ */
 
-// Chave pública da Web3Forms — pode ficar no client-side
-const WEB3FORMS_KEY = "b27b0cc3-07b2-4835-aa40-fe78df5a1d9f";
+// Chave pública Web3Forms — definida no .env
+const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_KEY as string;
 
 // Schema Zod para o formulário de contato
 const contatoSchema = z.object({

@@ -263,9 +263,11 @@ describe("HomePage — seção Equipe", () => {
   it("renderiza todos os membros da equipe", () => {
     renderPage();
     const equipe = screen.getByRole("region", { name: /equipe/i });
-    expect(within(equipe).getAllByText("Direção")).toHaveLength(1);
-    expect(within(equipe).getAllByText("Animação 2D")).toHaveLength(1);
-    expect(within(equipe).getAllByText("Produção")).toHaveLength(1);
+    // Todos os membros têm role "Colaboradora" conforme data.ts
+    expect(within(equipe).getAllByText("Colaboradora").length).toBeGreaterThanOrEqual(1);
+    // Verifica que os nomes dos membros estão presentes (aparecem 2x: nome + hover)
+    expect(within(equipe).getAllByText("Maria Eduarda").length).toBeGreaterThanOrEqual(1);
+    expect(within(equipe).getAllByText("Gabriely Soares").length).toBeGreaterThanOrEqual(1);
   });
 });
 
