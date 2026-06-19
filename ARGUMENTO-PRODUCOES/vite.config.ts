@@ -28,6 +28,13 @@ export default defineConfig({
     },
   },
 
+  server: {
+    proxy: {
+      "/login": "http://10.100.20.8:8000",
+      "/api": "http://10.100.20.8:8000",
+    },
+  },
+
   // Vitest config
   test: {
     globals: true,

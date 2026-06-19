@@ -1,7 +1,7 @@
 // Cliente HTTP que autentica na API Plugwin via sessão Laravel (CSRF + cookie).
 // Fluxo: GET /login → extrai XSRF-TOKEN → POST /login → sessão salva no cookie do browser.
 
-const BASE_URL = "http://10.100.20.8:8000";
+const BASE_URL = import.meta.env.VITE_API_URL ?? "";
 const HEALTH_TIMEOUT_MS = 3000; // Tempo máximo para considerar a API online
 
 // Testa se a API está acessível com timeout curto.
