@@ -64,12 +64,14 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group" aria-label="Argumento Produções — Início">
-            <img src={logo} alt="Argumento Produções" className="h-11 w-11 object-contain" />
-            <div className="hidden sm:block leading-tight">
-              <div className="font-display font-black text-lg tracking-tight">Argumento</div>
-              <div className="text-[10px] tracking-[0.3em] uppercase text-brand-ink/60">Produções</div>
-            </div>
+          <Link to="/" className="flex items-center group" aria-label="Argumento Produções — Início">
+            <img
+              src={logo}
+              alt="Argumento Produções"
+              className={`object-contain transition-all duration-500 ${
+                scrolled ? "h-[100px] w-[100px]" : "h-[120px] w-[120px]"
+              }`}
+            />
           </Link>
 
           {/* Desktop nav */}

@@ -18,6 +18,7 @@ import {
   ExternalLink,
   Loader2,
 } from "lucide-react";
+import ReCAPTCHA from "react-google-recaptcha";
 import { z } from "zod";
 import hero from "@/assets/hero.jpg";
 import { Layout } from "@/components/Layout";
@@ -664,8 +665,8 @@ function Noticias() {
 /* Contato                                                              */
 /* ------------------------------------------------------------------ */
 
-// Chave pública Web3Forms — definida no .env
 const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_KEY as string;
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY as string;
 
 // Schema Zod para o formulário de contato
 const contatoSchema = z.object({
@@ -683,6 +684,8 @@ function ContatoFormulario() {
   const [errors, setErrors] = useState<Partial<Record<keyof ContatoForm, string>>>({});
   const [status, setStatus] = useState<FormStatus>("idle");
   const [apiError, setApiError] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value } = e.target;
@@ -695,7 +698,12 @@ function ContatoFormulario() {
     e.preventDefault();
     setApiError(null);
 
-    // Validação client-side com Zod
+    if (!captchaToken) {
+      setApiError("Por favor, confirme que você não é um robô.");
+      setStatus("error");
+      return;
+    }
+
     const result = contatoSchema.safeParse(fields);
     if (!result.success) {
       const fieldErrors: typeof errors = {};
@@ -719,9 +727,9 @@ function ContatoFormulario() {
           email: fields.email,
           subject: `[Argumento Produções] ${fields.assunto} — ${fields.nome}`,
           message: fields.mensagem,
-          // Campos extras enviados como contexto no e-mail
           assunto: fields.assunto,
           from_name: "Site Argumento Produções",
+          "g-recaptcha-response": captchaToken,
         }),
       });
 
@@ -730,6 +738,8 @@ function ContatoFormulario() {
       if (response.ok && data.success) {
         setStatus("success");
         setFields({ nome: "", email: "", assunto: "", mensagem: "" });
+        setCaptchaToken(null);
+        recaptchaRef.current?.reset();
       } else {
         setApiError(data.message ?? "Erro ao enviar. Tente novamente.");
         setStatus("error");
@@ -821,9 +831,17 @@ function ContatoFormulario() {
         {errors.mensagem && <p className="mt-1 text-xs text-red-500">{errors.mensagem}</p>}
       </div>
 
+      <ReCAPTCHA
+        ref={recaptchaRef}
+        sitekey={RECAPTCHA_SITE_KEY}
+        onChange={setCaptchaToken}
+        onExpired={() => setCaptchaToken(null)}
+        hl="pt-BR"
+      />
+
       <button
         type="submit"
-        disabled={isLoading}
+        disabled={isLoading || !captchaToken}
         className="w-full rounded-xl bg-brand-ink text-brand-cream font-semibold py-3.5 hover:bg-brand-orange transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         {isLoading ? (
