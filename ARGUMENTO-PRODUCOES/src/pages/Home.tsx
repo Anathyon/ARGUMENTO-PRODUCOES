@@ -98,7 +98,7 @@ function Hero() {
           className="inline-flex items-center gap-2 rounded-full bg-brand-butter px-4 py-1.5 text-xs font-semibold tracking-widest uppercase text-brand-ink mb-8"
         >
           <Sparkles className="h-3.5 w-3.5 text-brand-orange" aria-hidden="true" />
-          Estúdio de Animação Brasileiro
+          Estúdio Audiovisual Brasileiro
         </motion.div>
 
         <h1 className="font-display font-black tracking-tighter leading-[0.92] text-[14vw] sm:text-[10vw] lg:text-[8.5rem] max-w-5xl">
@@ -132,8 +132,8 @@ function Hero() {
           transition={{ delay: 1.1, duration: 0.7 }}
           className="mt-10 max-w-xl text-lg text-brand-ink/75 leading-relaxed"
         >
-          Animação, narrativa e identidade nordestina. Produzimos filmes que
-          celebram a cultura, a memória e a imaginação do nosso povo.
+          Cinema, identidade nordestina e cultura. Produzimos filmes que
+          celebram a memória e a imaginação do nosso povo.
         </motion.p>
 
         <motion.div
@@ -188,12 +188,12 @@ function Marquee() {
   const repeated = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS, ...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
   return (
     <div
-      className="bg-brand-ink text-brand-butter py-6 overflow-hidden border-y-4 border-brand-orange"
+      className="bg-brand-ink text-brand-butter py-3 overflow-hidden border-y-2 border-brand-orange"
       aria-hidden="true"
     >
-      <div className="flex marquee gap-12 whitespace-nowrap">
+      <div className="flex marquee gap-8 whitespace-nowrap">
         {repeated.map((it, i) => (
-          <div key={i} className="flex items-center gap-12 font-display text-3xl md:text-4xl italic">
+          <div key={i} className="flex items-center gap-8 font-display text-base md:text-lg italic">
             {it}
             <span className="text-brand-orange">✦</span>
           </div>
@@ -343,7 +343,7 @@ function Trabalhos() {
 
 function Equipe({ onSelectMember }: { onSelectMember: (member: TeamMember) => void }) {
   return (
-    <section id="equipe" className="relative py-28 lg:py-40 bg-brand-butter bg-grain" aria-label="Equipe">
+    <section id="equipe" className="relative py-28 lg:py-40 bg-brand-butter-light bg-grain" aria-label="Equipe">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-16">
           <div>
@@ -353,7 +353,7 @@ function Equipe({ onSelectMember }: { onSelectMember: (member: TeamMember) => vo
             </SectionTitle>
           </div>
           <p className="max-w-md text-brand-ink/75 leading-relaxed">
-            Direção, roteiro, animação e produção sob o mesmo teto. Conheça os
+            Direção, roteiro, fotografia e produção sob o mesmo teto. Conheça os
             colaboradores que dão vida às nossas histórias.
           </p>
         </div>
@@ -541,10 +541,9 @@ function Institucional() {
 
         <div className="mt-12 max-w-3xl text-lg text-brand-cream/75 leading-relaxed">
           <p>
-            A <strong className="text-brand-butter">Argumento Produções</strong> é um estúdio dedicado à
-            animação e à produção audiovisual brasileira. Empresa parceira da Narrativa Entretenimento
-            — mas com identidade, time e portfólio próprios — buscamos contar histórias que respiram
-            o nosso país, do sertão à tela.
+            A <strong className="text-brand-butter">Argumento Produções</strong> é uma produtora dedicada à
+            produção audiovisual brasileira. Com identidade, time e portfólio próprios, buscamos contar
+            histórias que respiram o nosso país, do sertão à tela.
           </p>
         </div>
 
@@ -885,18 +884,20 @@ function Contato() {
 
             <div className="mt-10 space-y-4">
               <a
-                href="mailto:contato@argumentoproducoes.com.br"
+                href="mailto:argumentop@gmail.com"
                 className="group flex items-center justify-between p-5 rounded-2xl bg-brand-butter hover:bg-brand-ink hover:text-brand-butter transition-colors"
               >
                 <div className="flex items-center gap-4">
                   <Mail className="h-5 w-5" aria-hidden="true" />
-                  <span className="font-semibold">contato@argumentoproducoes.com.br</span>
+                  <span className="font-semibold">argumentop@gmail.com</span>
                 </div>
                 <ArrowUpRight className="h-5 w-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" aria-hidden="true" />
               </a>
               <div className="grid grid-cols-2 gap-4">
                 <a
-                  href="#"
+                  href="https://www.instagram.com/argumento.producoes?igsh=MXZwc3ppNm1zN3RsNg=="
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="group flex items-center justify-between p-5 rounded-2xl border-2 border-brand-ink hover:bg-brand-orange hover:border-brand-orange hover:text-brand-cream transition-colors"
                   aria-label="Instagram da Argumento Produções"
                 >
@@ -907,7 +908,9 @@ function Contato() {
                   <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
                 </a>
                 <a
-                  href="#"
+                  href="https://www.youtube.com/c/argumentoproducoes"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="group flex items-center justify-between p-5 rounded-2xl border-2 border-brand-ink hover:bg-brand-ember hover:border-brand-ember hover:text-brand-cream transition-colors"
                   aria-label="YouTube da Argumento Produções"
                 >

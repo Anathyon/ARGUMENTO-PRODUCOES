@@ -16,12 +16,12 @@ export const FALLBACK_TRABALHOS: ApiTrabalho[] = [
     duracao: "14 min",
     ano: "2024",
     festival: "Festival de Gramado",
-    categoria: "Curta-metragem · Animação 2D",
-    tags: ["animação", "sertão", "curta"],
+    categoria: "Curta-metragem · Ficção",
+    tags: ["cinema", "sertão", "curta"],
     creditos: [
       { funcao: "Direção e Roteiro", nome: "Mariana Souza" },
       { funcao: "Direção de Arte", nome: "Sofia Mendes" },
-      { funcao: "Animação Principal", nome: "Matheus Silva" },
+      { funcao: "Fotografia", nome: "Matheus Silva" },
       { funcao: "Produção", nome: "Beatriz Santos" },
     ],
   },
@@ -37,8 +37,8 @@ export const FALLBACK_TRABALHOS: ApiTrabalho[] = [
     duracao: "26 min",
     ano: "2023",
     festival: "Mostra Cinesertão",
-    categoria: "Especial · Animação 2D",
-    tags: ["animação", "natal", "sertão"],
+    categoria: "Especial · Documentário",
+    tags: ["cinema", "natal", "sertão"],
     creditos: [
       { funcao: "Direção", nome: "Mariana Souza" },
       { funcao: "Roteiro", nome: "Lucas Rocha" },
@@ -52,13 +52,13 @@ export const FALLBACK_PORTFOLIO: ApiPortfolio[] = [
     id: 1,
     slug: "arte-na-palha",
     titulo: "Arte na Palha",
-    resumo: "Curta-metragem premiado em festivais nacionais de animação.",
+    resumo: "Curta-metragem premiado em festivais nacionais de cinema.",
     sinopse:
-      "Portfólio detalhado sobre a concepção visual, esboços iniciais e premiações recebidas pelo curta-metragem. Produzido ao longo de 14 meses com técnicas híbridas de animação.",
+      "Portfólio detalhado sobre a concepção visual, esboços iniciais e premiações recebidas pelo curta-metragem. Produzido ao longo de 14 meses com técnicas híbridas de captação.",
     ano: "2024",
     festival: "Festival de Gramado",
-    categoria: "Curta · Animação",
-    tags: ["animação 2D", "premiado"],
+    categoria: "Curta · Ficção",
+    tags: ["cinema", "premiado"],
     creditos: [
       { funcao: "Direção", nome: "Mariana Souza" },
       { funcao: "Arte", nome: "Sofia Mendes" },
@@ -73,16 +73,16 @@ export const FALLBACK_PORTFOLIO: ApiPortfolio[] = [
       "Documentação do projeto de produção e recepção pública do especial. Destaca-se pelo uso inovador de paleta de cores inspiradas nas gravuras sertanejas.",
     ano: "2023",
     festival: "Mostra Cinesertão",
-    categoria: "Especial · Animação",
-    tags: ["animação 2D", "especial de TV"],
+    categoria: "Especial · Documentário",
+    tags: ["cinema", "especial de TV"],
   },
   {
     id: 3,
     slug: "microcuriosidades",
     titulo: "Microcuriosidades",
-    resumo: "Série educativa de micro-animações sobre fatos do Nordeste.",
+    resumo: "Série educativa de micro-vídeos sobre fatos do Nordeste.",
     sinopse:
-      "Série de 12 episódios curtos distribuídos nas redes sociais. Fatos curiosos sobre o semiárido em pílulas animadas de 1 minuto.",
+      "Série de 12 episódios curtos distribuídos nas redes sociais. Fatos curiosos sobre o semiárido em pílulas de 1 minuto.",
     ano: "2022",
     categoria: "Série Web",
     tags: ["educativo", "série"],
@@ -95,7 +95,7 @@ export const FALLBACK_PORTFOLIO: ApiPortfolio[] = [
     sinopse:
       "Projeto épico que visa expandir o repertório visual do estúdio para o formato de longa-metragem comercial.",
     ano: "2026",
-    categoria: "Longa · Animação",
+    categoria: "Longa · Ficção",
     tags: ["em produção"],
   },
 ];
@@ -104,7 +104,7 @@ export const FALLBACK_NOTICIAS: ApiNoticia[] = [
   {
     id: 1,
     slug: "arte-na-palha-estreia-em-mostra",
-    titulo: "Arte na Palha estreia em mostra nacional de animação",
+    titulo: "Arte na Palha estreia em mostra nacional de cinema",
     resumo:
       "Nosso novo curta chega ao circuito com sessões especiais e bate-papo com a equipe criativa.",
     autor: "Assessoria Argumento",
@@ -112,7 +112,7 @@ export const FALLBACK_NOTICIAS: ApiNoticia[] = [
     categoria: "Lançamento",
     tags: ["lançamento", "festival"],
     conteudo_html:
-      "<p>É com imensa alegria que anunciamos a estreia de <strong>Arte na Palha</strong> na 28ª Mostra Nacional de Animação. O filme será exibido no bloco de curtas autorais, seguido de um painel especial de debate com a diretora Mariana Souza e a diretora de arte Sofia Mendes.</p><p>Venha celebrar a arte que respira com a gente!</p>",
+      "<p>É com imensa alegria que anunciamos a estreia de <strong>Arte na Palha</strong> na 28ª Mostra Nacional de Cinema. O filme será exibido no bloco de curtas autorais, seguido de um painel especial de debate com a diretora Mariana Souza e a diretora de arte Sofia Mendes.</p><p>Venha celebrar a arte que respira com a gente!</p>",
   },
   {
     id: 2,
@@ -138,6 +138,6 @@ export const FALLBACK_NOTICIAS: ApiNoticia[] = [
     categoria: "Em produção",
     tags: ["longa", "produção"],
     conteudo_html:
-      "<p>Depois do sucesso dos nossos curtas, a Argumento Produções dá seu passo mais ambicioso: o desenvolvimento de nosso primeiro longa-metragem de animação.</p><p>O projeto acaba de entrar na fase de pré-produção, que inclui o refinamento do roteiro e os primeiros estudos de design de personagens.</p>",
+      "<p>Depois do sucesso dos nossos curtas, a Argumento Produções dá seu passo mais ambicioso: o desenvolvimento de nosso primeiro longa-metragem cinematográfico.</p><p>O projeto acaba de entrar na fase de pré-produção, que inclui o refinamento do roteiro e os primeiros estudos de design de personagens.</p>",
   },
 ];

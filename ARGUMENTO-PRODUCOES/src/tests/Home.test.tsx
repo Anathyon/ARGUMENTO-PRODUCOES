@@ -126,7 +126,7 @@ describe("HomePage — estrutura", () => {
 
   it("renderiza parágrafo de descrição hero", () => {
     renderPage();
-    expect(screen.getByText(/animação, narrativa e identidade nordestina/i)).toBeInTheDocument();
+    expect(screen.getByText(/cinema, identidade nordestina e cultura/i)).toBeInTheDocument();
   });
 });
 
@@ -290,8 +290,8 @@ describe("HomePage — seção Contato", () => {
   it("link de e-mail correto", () => {
     renderPage();
     expect(
-      screen.getByRole("link", { name: /contato@argumentoproducoes\.com\.br/i })
-    ).toHaveAttribute("href", "mailto:contato@argumentoproducoes.com.br");
+      screen.getByRole("link", { name: /argumentop@gmail\.com/i })
+    ).toHaveAttribute("href", "mailto:argumentop@gmail.com");
   });
 
   it("links de redes sociais presentes", () => {

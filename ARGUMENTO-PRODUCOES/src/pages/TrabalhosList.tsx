@@ -55,7 +55,7 @@ export default function TrabalhosList() {
           >
             <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold tracking-[0.25em] uppercase bg-brand-ink text-brand-butter mb-6">
               <Film className="h-3.5 w-3.5" aria-hidden="true" />
-              Animação Autoral
+              Audiovisual Autoral
             </div>
             <h1 className="font-display font-black tracking-tighter leading-[0.95] text-5xl md:text-7xl lg:text-8xl max-w-4xl">
               Trabalhos &{" "}

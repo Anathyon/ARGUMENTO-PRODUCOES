@@ -118,11 +118,11 @@ export const TEAM_MEMBERS: TeamMember[] = [
 export const INSTITUTION_VALUES = [
   {
     title: "Missão",
-    text: "Produzir animações e narrativas que valorizam a cultura, a memória e a imaginação brasileira — com qualidade artística e responsabilidade social.",
+    text: "Produzir obras audiovisuais que valorizam a cultura, a memória e a imaginação brasileira — com qualidade artística e responsabilidade social.",
   },
   {
     title: "Visão",
-    text: "Ser referência nacional em animação autoral e produção audiovisual, conectando o sertão ao mundo através de histórias universais.",
+    text: "Ser referência nacional em produção audiovisual autoral e cinema, conectando o sertão ao mundo através de histórias universais.",
   },
   {
     title: "Valores",
@@ -131,6 +131,6 @@ export const INSTITUTION_VALUES = [
 ] as const;
 
 export const MARQUEE_ITEMS = [
-  "Animação", "Narrativa", "Roteiro", "Sertão",
+  "Cinema", "Audiovisual", "Roteiro", "Sertão",
   "Cultura", "Direção", "Produção", "Identidade",
 ] as const;

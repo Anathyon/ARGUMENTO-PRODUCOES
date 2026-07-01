@@ -196,7 +196,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <span className="text-gradient-warm italic">Argumento</span>
               </Link>
               <div className="mt-2 text-xs uppercase tracking-[0.4em] text-brand-cream/50">
-                Produções · Animação · Narrativa
+                Produções · Cinema · Audiovisual
               </div>
             </div>
             <div className="flex flex-col md:items-end gap-4 text-sm text-brand-cream/60">
