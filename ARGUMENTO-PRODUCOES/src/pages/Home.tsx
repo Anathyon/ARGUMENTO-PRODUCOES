@@ -83,8 +83,8 @@ function Hero() {
     >
       <motion.div style={{ scale, y }} className="absolute inset-0 will-change-transform">
         <img src={hero} alt="" role="presentation" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-linear-to-b from-brand-butter/30 via-brand-cream/40 to-brand-cream" />
-        <div className="absolute inset-0 bg-linear-to-r from-brand-cream via-brand-cream/40 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-b from-brand-butter/30 via-[#383838]/40 to-[#383838]" />
+        <div className="absolute inset-0 bg-linear-to-r from-[#383838] via-[#383838]/40 to-transparent" />
       </motion.div>
 
       <motion.div
@@ -101,7 +101,7 @@ function Hero() {
           Estúdio Audiovisual Brasileiro
         </motion.div>
 
-        <h1 className="font-display font-black tracking-tighter leading-[0.92] text-[14vw] sm:text-[10vw] lg:text-[8.5rem] max-w-5xl">
+        <h1 className="font-display font-black tracking-tighter leading-[0.92] text-[14vw] sm:text-[10vw] lg:text-[8.5rem] max-w-5xl text-[#E0E0E0]">
           {"Histórias".split("").map((c, i) => (
             <motion.span
               key={i}
@@ -130,7 +130,7 @@ function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.1, duration: 0.7 }}
-          className="mt-10 max-w-xl text-lg text-brand-ink/75 leading-relaxed"
+          className="mt-10 max-w-xl text-lg text-[#D0D0D0] leading-relaxed"
         >
           Cinema, identidade nordestina e cultura. Produzimos filmes que
           celebram a memória e a imaginação do nosso povo.
@@ -153,7 +153,7 @@ function Hero() {
           </a>
           <a
             href="#institucional"
-            className="inline-flex items-center gap-2 font-semibold text-brand-ink hover:text-brand-orange transition-colors"
+            className="inline-flex items-center gap-2 font-semibold text-[#E0E0E0] hover:text-brand-orange transition-colors"
           >
             Sobre o estúdio
             <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
@@ -164,7 +164,7 @@ function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.6, duration: 1 }}
-          className="absolute bottom-10 left-6 lg:left-10 flex items-center gap-3 text-xs uppercase tracking-[0.3em] text-brand-ink/50"
+          className="absolute bottom-10 left-6 lg:left-10 flex items-center gap-3 text-xs uppercase tracking-[0.3em] text-[#E0E0E0]/60"
           aria-hidden="true"
         >
           <motion.span
